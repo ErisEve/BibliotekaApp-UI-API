@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervacija stola u biblioteci</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/seat_reservation.css}" />
+</head>
+<body>
+<div class="library-dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <div class="brand-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h1>Biblioteka<span>Rezervacija stola</span></h1>
+        </div>
+        <a href="#" class="nav-link active" onclick="window.location.href = '/dashboard';">
+            <i class="fas fa-hand-holding-heart"></i>
+            Pozajmi knjigu
+        </a>
+        <div class="header-actions">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search seats..." id="searchInput" onkeyup="filterSeats()">
+                <button onclick="refreshSeats()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">JD</div>
+                <span></span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-info">
+                <h4>Slobodno</h4>
+                <div class="value" id="availableCount">0</div>
+            </div>
+            <div class="stat-icon available">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <h4>Zauzeto</h4>
+                <div class="value" id="occupiedCount">0</div>
+            </div>
+            <div class="stat-icon occupied">
+                <i class="fas fa-times-circle"></i>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <h4>Selektovano</h4>
+                <div class="value" id="selectedCount">0</div>
+            </div>
+            <div class="stat-icon selected">
+                <i class="fas fa-check-double"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div>
+            <div class="section-header">
+                <h2>Prostor za citanje</h2>
+                <span class="badge-count" id="totalSeatsBadge"><i class="fas fa-chair" style="color: #1e2a4a;"></i>0 </span>
+            </div>
+            <div class="seat-grid" id="seatGrid">
+                <!-- Seats will be rendered here -->
+            </div>
+
+            <!-- Action Panel -->
+            <div class="action-panel">
+                <div class="selected-info">
+                    <span style="font-weight: 500; color: #1e2a4a;">Selected:</span>
+                    <span id="selectedSeatDisplay" style="color: #63738e;">None</span>
+                    <div id="selectedSeatPreview" style="display: none;" class="seat-preview">
+                        <i class="fas fa-chair"></i>
+                        <span id="selectedSeatNumber">-</span>
+                        <button class="remove-btn" onclick="clearSelection()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-success" id="reserveBtn" onclick="reserveSeat()" disabled>
+                        <i class="fas fa-check"></i> Rezervisi
+                    </button>
+                    <button class="btn btn-outline" onclick="refreshSeats()">
+                        <i class="fas fa-sync-alt"></i> Osvezi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-meta">
+            <span>
+                <i class="fas fa-circle" style="color: #48bb78; font-size: 0.5rem; vertical-align: middle;"></i>
+                Slobodno
+                <i class="fas fa-circle" style="color: #fc8181; font-size: 0.5rem; vertical-align: middle; margin-left: 12px;"></i>
+                Zauzeto
+                <i class="fas fa-circle" style="color: #4299e1; font-size: 0.5rem; vertical-align: middle; margin-left: 12px;"></i>
+                Selektovano
+            </span>
+        <span class="badge">
+                <i class="fas fa-sync-alt fa-fw"></i> Auto-refresh: 30s
+            </span>
+    </div>
+</div>
+<script th:src="@{/js/seat_reservation.js}" defer></script>
+</body>
+</html>

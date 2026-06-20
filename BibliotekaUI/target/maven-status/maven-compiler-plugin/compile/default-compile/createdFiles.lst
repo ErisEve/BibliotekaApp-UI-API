@@ -1,0 +1,6 @@
+org\example\bibliotekaui\models\User.class
+org\example\bibliotekaui\feign_client\UserClient.class
+org\example\bibliotekaui\models\SessionData.class
+org\example\bibliotekaui\controllers\HomeController.class
+org\example\bibliotekaui\BibliotekaUiApplication.class
+org\example\bibliotekaui\models\SessionDataHolder.class
