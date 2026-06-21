@@ -14,6 +14,7 @@ public class LendingService {
     private LendingRepository lendingRepository;
 
     public Lending saveLending(Lending lending) {
+
         return lendingRepository.save(lending);
     }
 
@@ -24,4 +25,6 @@ public class LendingService {
     public List<Lending> getLendingsByUserEmail(String email) {
         return lendingRepository.findByUserEmail(email);
     }
+
+
 }

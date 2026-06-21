@@ -69,7 +69,7 @@ public class SecurityConfig {
                         // Allow unauthenticated access to auth endpoints and home
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/static/**").permitAll()
 
-                        .requestMatchers("/api/lendings/**").authenticated()
+                        .requestMatchers("/api/lendings/**").permitAll()
 
                         // Add the swagger patterns
                         .requestMatchers(

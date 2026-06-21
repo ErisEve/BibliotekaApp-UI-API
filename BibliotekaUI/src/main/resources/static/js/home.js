@@ -20,6 +20,19 @@ function openBookDetailModal(book) {
     const detailDescription = document.getElementById('detailDescription');
     const detailStatus = document.getElementById('detailStatus');
     const coverContainer = document.getElementById('bookDetailCover');
+    const emailInput = document.getElementById('loanUserEmail');
+
+    const role = localStorage.getItem('role') || 'USER';
+
+    document.getElementById('ifuser-email').style.display = (role === 'USER') ? 'block' : 'none';
+    document.getElementById('ifnotuser-email').style.display = (role === 'USER') ? 'none' : 'block';
+
+    if (role === 'USER') {
+        document.getElementById('loanUserEmail1').value =
+            localStorage.getItem('email') || localStorage.getItem('userEmail') || '';
+    } else{
+        document.getElementById('loanUserEmail2').required = true;
+    }
 
     if (!modal) {
         console.error('Modal not found');
@@ -54,14 +67,15 @@ function openBookDetailModal(book) {
             coverContainer.innerHTML = `<i class="fas fa-book" style="font-size: 3rem; color: #3c5270;"></i>`;
         }
     }
+    localStorage.setItem('currentBookId', book.id);
 
     const loanForm = document.getElementById('loanForm');
     if (loanForm) {
+        loanForm.addEventListener('submit', makeANewLoan);
+    }
+    if (loanForm) {
         loanForm.dataset.bookId = book.id || book.bookId || '';
     }
-
-    const loanUserEmail = document.getElementById('loanUserEmail');
-    if (loanUserEmail) loanUserEmail.value = '';
 
     const loanDays = document.getElementById('loanDays');
     if (loanDays) loanDays.value = '14';
@@ -73,6 +87,75 @@ function openBookDetailModal(book) {
     }
 
     modal.classList.add('open');
+}
+// ========================================
+// LOAN BOOKS
+// ========================================
+
+function makeANewLoan(event) {
+    event.preventDefault();
+
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('Morate biti prijavljeni', 'error');
+        return;
+    }
+
+    // Get email based on role
+    const role = localStorage.getItem('role') || 'USER';
+    let email;
+    if (role === 'USER') {
+        email = localStorage.getItem('userEmail') ;
+    } else {
+        email = document.getElementById('loanUserEmail2').value.trim();
+    }
+
+    const days = parseInt(document.getElementById('loanDays').value);
+
+    if (!email) {
+        alert('Unesite email');
+        return;
+    }
+
+    if (!days || days < 1 || days > 30) {
+        alert('Unesite validan broj dana (1-30)');
+        return;
+    }
+
+    // Get book ID from wherever you store it (modal or variable)
+    const bookId = localStorage.getItem('currentBookId');
+    if (!bookId) {
+        alert('Greška: knjiga nije odabrana');
+        return;
+    }
+
+    fetch('http://localhost:8080/api/lendings/loanABook', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            token:token,
+            bookId: parseInt(bookId),
+            userEmail: email,
+            days: days
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // alert('Knjiga uspešno pozajmljena!');
+            setTimeout(() => location.reload(), 1500);
+            // closeBookDetailModal();
+        })
+        .catch(error => {
+            alert('Greška: ' + error.message);
+        });
 }
 
 function closeBookDetailModal() {
@@ -964,7 +1047,6 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
-
 // ========================================
 // FIND USER WITH HIGHEST LOAN COUNT
 // ========================================

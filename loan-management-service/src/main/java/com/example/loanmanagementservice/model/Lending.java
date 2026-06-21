@@ -18,6 +18,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Lending {
+
+    public Lending(User user, Book book, LocalDate borrowDate, LocalDate returnDate){
+        this.book = book;
+        this.user = user;
+        this.borrowDate = borrowDate;
+        this.returnDate = returnDate;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
