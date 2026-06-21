@@ -341,7 +341,7 @@ async function reserveSeat() {
     const token = localStorage.getItem('jwtToken');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/${selectedSeatId}/reserve`, {
+        const response = await fetch(`${API_BASE_URL}/reserve`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

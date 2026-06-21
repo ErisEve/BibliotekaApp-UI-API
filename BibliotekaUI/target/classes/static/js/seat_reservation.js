@@ -101,7 +101,7 @@ async function fetchSeats() {
 
         if (response.status === 403) {
             console.error('Forbidden ');
-            showToast('You do not have permission to view seats. ', 'error');
+            showToast('Nemas permisije da gledas sedista. ', 'error');
             // Still use hardcoded data for demo
             const seats = HARDCODED_SEATS.map(seat => ({
                 ...seat,
@@ -341,8 +341,8 @@ async function reserveSeat() {
     const token = localStorage.getItem('jwtToken');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/${selectedSeatId}/reserve`, {
-            method: 'POST',
+        const response = await fetch(`${API_BASE_URL}/reserve`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
