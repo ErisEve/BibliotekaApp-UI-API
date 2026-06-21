@@ -557,7 +557,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 renderLoansGrid(loans);
                 renderBooksGrid(availableBooks);
-                updateTopBorrowerDisplay(loans);
 
                 return loans;
             })
@@ -608,10 +607,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let htmlEl = '';
 
+        let emails = [];
         sortedLoans.forEach(loan => {
             const bookTitle = loan.bookTitle || loan.book?.title || loan.title || 'Unknown Book';
-            const userName = loan.userName || loan.user?.name || loan.borrower || 'Unknown User';
-            const userEmail = loan.userEmail || loan.user?.email || loan.borrowerEmail || '';
+            const userEmail = (loan.userEmail || loan.user?.email || loan.borrowerEmail || '').split("@")[0];
+            emails.push(userEmail);
             const borrowDate = loan.borrowDate || loan.borrowedDate || loan.borrowedAt || 'N/A';
             const returnDate = loan.returnDate || loan.returnedDate || loan.returnedAt || 'N/A';
             const isOverdue = loan.overdue || loan.isOverdue || false;
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isLibrarian) {
                 // LIBRARIAN: Shows "Borrowed by [name]" + Return button on ALL loans
                 userDisplay = `
-                <div class="user-name">Borrowed by ${escapeHtml(userName)}</div>
+                <div class="user-name">Borrowed by ${escapeHtml(userEmail)}</div>
                 <div class="loan-actions">
                     <button class="return-book-btn" data-loan-id="${loanId}" data-book-title="${escapeHtml(bookTitle)}">
                         <i class="fas fa-undo-alt"></i> Return
@@ -654,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isOwnLoan) {
                     userDisplay = `<div class="user-name" style="font-weight: 500; color: #1a6e4a;">Your loan</div>`;
                 } else {
-                    userDisplay = `<div class="user-name">Borrowed by ${escapeHtml(userName)}</div>`;
+                    userDisplay = `<div class="user-name">Borrowed by ${escapeHtml(userEmail)}</div>`;
                 }
             }
 
@@ -677,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         });
-
+        updateTopBorrowerDisplay(emails);
         loanGridElement.innerHTML = htmlEl;
 
         // Attach return button event listeners (only librarians have these buttons)
@@ -1189,49 +1189,31 @@ function findTopBorrower(loansData) {
         console.warn('No loan data available');
         return null;
     }
-
+    console.log(loansData);
     // Count loans per user
     const loanCounts = {};
 
-    loansData.forEach(loan => {
-        const userId = loan.userId || loan.user?.id || loan.user_id || null;
-        const userName = loan.userName || loan.user?.name || loan.borrower || null;
-
-        if (userId) {
-            if (!loanCounts[userId]) {
-                loanCounts[userId] = {
-                    count: 0,
-                    name: userName || 'Unknown User'
-                };
-            }
-            loanCounts[userId].count++;
+    loansData.forEach(email => {
+        if (!loanCounts[email]) {
+            loanCounts[email] = 0;
         }
+        loanCounts[email]++;
     });
 
-    console.log('Loan counts per user:', loanCounts);
+    let maxEmail = null;
+    let maxCount = 0;
 
-    // Find user with highest count
-    let topUserId = null;
-    let topCount = 0;
-    let topName = '';
-
-    for (const [userId, data] of Object.entries(loanCounts)) {
-        if (data.count > topCount) {
-            topCount = data.count;
-            topUserId = userId;
-            topName = data.name;
+    for (const [email, count] of Object.entries(loanCounts)) {
+        if (count > maxCount) {
+            maxCount = count;
+            maxEmail = email;
         }
     }
 
-    if (topUserId) {
-        return {
-            userId: topUserId,
-            name: topName,
-            count: topCount
-        };
-    }
+    console.log('User with most loans:', maxEmail);
+    console.log('Number of loans:', maxCount);
 
-    return null;
+    return { name: maxEmail, count: maxCount};
 }
 
 // ========================================

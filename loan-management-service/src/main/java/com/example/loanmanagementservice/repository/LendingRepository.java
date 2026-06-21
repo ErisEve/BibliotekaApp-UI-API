@@ -15,5 +15,4 @@ public interface LendingRepository extends JpaRepository<Lending, Long> {
 
     // For support filtering by user email
     List<Lending> findByUserEmail(String email);
-
 }
