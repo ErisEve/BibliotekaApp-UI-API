@@ -19,6 +19,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -85,21 +88,37 @@ public class AuthController {
             // Load user credentials and role for authentication
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginRequest.getEmail());
             System.out.println("Loaded user details for JWT generation");
-            String role = userDetails.getAuthorities().stream()
-                    .map(authority -> authority.getAuthority())
-                    .findFirst()
-                    .orElse("USER");
 
-            if (role.startsWith("ROLE_")) {
-                role = role.substring(5);
+            List<String> authorities = userDetails.getAuthorities().stream()
+                    .map(authority -> authority.getAuthority())
+                    .collect(Collectors.toList());
+
+            String role = "USER";
+            Long userId = null;
+
+            for (String authority : authorities) {
+                if (authority.startsWith("ROLE_")) {
+                    role = authority.substring(5); // Remove "ROLE_"
+                } else if (authority.startsWith("ID_")) {
+                    userId = Long.parseLong(authority.substring(3)); // Remove "ID_"
+                }
             }
-            System.out.println("Role extracted: " + role);
-//            User newUser = new User(loginRequest.getEmail(), loginRequest.getPassword());
+
+            System.out.println("Role: " + role);
+            System.out.println("User ID: " + userId);
+//            String role = userDetails.getAuthorities().stream()
+//                    .map(authority -> authority.getAuthority())
+//                    .findFirst()
+//                    .orElse("USER");
+//
+//            if (role.startsWith("ROLE_")) {
+//                role = role.substring(5);
+//            }
             // Generate token
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("JWT generated: " + token);
 
-            return ResponseEntity.ok(new AuthResponse(token, role));
+            return ResponseEntity.ok(new AuthResponse(token, role, userId));
         } catch (Exception e) {
             System.out.println("Authentication failed: " + e.getMessage());
             e.printStackTrace();

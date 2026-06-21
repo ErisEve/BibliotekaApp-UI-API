@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function loginUser(email, password) {
-        const API_URL = 'http://localhost:8082';
+        const API_URL = 'http://localhost:8080';
         localStorage.setItem('userEmail', email);
         fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',
@@ -56,13 +56,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
+                console.log('📋 Full response:', JSON.stringify(data, null, 2));
+                console.log('📋 Keys in response:', Object.keys(data));
+                console.log('📋 userId value:', data.userId);
+                console.log('📋 typeof userId:', typeof data.userId);
                 if (data.token) {
                     // Save token
                     localStorage.setItem('jwtToken', data.token);
                     console.log('Login successful!');
                     // Redirect to dashboard
 
-                    window.location.href = '/dashboard';
                 } else {
                     throw new Error('No token received');
                 }
@@ -72,6 +75,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }else {
                     throw new Error('No role received');
                 }
+                if(data.userId){
+                    localStorage.setItem('userId', data.userId);
+                    console.log('Id update successful');
+                }else {
+                    throw new Error('No id received');
+                }
+                window.location.href = '/dashboard';
             })
             .catch(error => {
                 console.error('Login error:', error);
@@ -94,26 +104,4 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.style.display = 'none';
     }
 
-    // Auto-login if token exists (optional)
-    // const token = localStorage.getItem('jwtToken');
-    // if (token && window.location.pathname === '/login') {
-    //     // Verify token is still valid
-    //     fetch('/api/books', {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`
-    //         }
-    //     })
-    //         .then(response => {
-    //             if (response.ok) {
-    //                 // Token is valid, redirect to dashboard
-    //                 window.location.href = '/dashboard';
-    //             } else if (response.status === 401) {
-    //                 // Token expired, remove it
-    //                 localStorage.removeItem('jwtToken');
-    //             }
-    //         })
-    //         .catch(() => {
-    //             // Error checking token, stay on login page
-    //         });
-    // }
 });
