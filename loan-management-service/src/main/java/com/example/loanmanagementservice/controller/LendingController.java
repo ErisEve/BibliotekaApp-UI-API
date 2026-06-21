@@ -10,7 +10,9 @@ import com.example.loanmanagementservice.service.LendingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -65,5 +67,16 @@ public class LendingController {
     @GetMapping("/user-email")
     public ResponseEntity<List<Lending>> getLendingsByUserEmail(@RequestParam String email) {
         return ResponseEntity.ok(lendingService.getLendingsByUserEmail(email));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteLoan(@PathVariable Long id) {
+        if (lendingService.existsById(id)) {
+            lendingService.deleteById(id);
+            return ResponseEntity.ok("Loan with ID " + id + " deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Loan with ID " + id + " not found.");
+        }
     }
 }

@@ -1124,3 +1124,53 @@ body {
         font-size: 0.8rem;
     }
 }
+
+
+/* Loan item hover effects */
+.lending-item {
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+}
+
+.lending-item.returnable:hover {
+    background: #f0f6ff;
+    box-shadow: 0 4px 12px rgba(30, 42, 74, 0.08);
+    transform: translateY(-2px);
+}
+
+.lending-item .loan-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.lending-item.returnable:hover .loan-actions {
+    opacity: 1;
+}
+
+.return-book-btn {
+    background: #1e2a4a;
+    color: white;
+    border: none;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.return-book-btn:hover {
+    background: #2b3a60;
+    transform: scale(1.05);
+}
+
+.return-book-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+

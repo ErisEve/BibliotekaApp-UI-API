@@ -26,5 +26,13 @@ public class LendingService {
         return lendingRepository.findByUserEmail(email);
     }
 
+    public void deleteById(Long id) {
+        lendingRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id) {
+        return lendingRepository.existsById(id);
+    }
+
 
 }
