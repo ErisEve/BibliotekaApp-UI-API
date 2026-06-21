@@ -19,7 +19,7 @@ public class Seat {
     @Column(nullable = false, unique = true)
     private String seat_number;
 
-    @Column(nullable = true)
-    private String reserved_by;
+    @OneToOne
+    User user;
 
 }

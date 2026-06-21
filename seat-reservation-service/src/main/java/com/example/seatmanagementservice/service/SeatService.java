@@ -19,6 +19,6 @@ public class SeatService {
         return seatRepository.fetchAllSeats();
     }
 
-
+    public Seat reserveSeat(Long seatId,Long  userId){ return seatRepository.reserveSeat(seatId, userId);}
 
 }

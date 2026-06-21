@@ -1,62 +1,17 @@
 // Configuration
-const API_BASE_URL = "http://localhost:8084/api/seats";
+const API_BASE_URL = "http://localhost:8080/api/seats";
 let seatsData = [];
+let globalSeatsData = [];
 let selectedSeatId = null;
 let userId = 1;
 
-// Hardcoded seat data for demonstration
-// const HARDCODED_SEATS = [
-//     // Row 1 - A1 to A8
-//     { id: 1, seatNumber: 'A1', status: 'available' },
-//     { id: 2, seatNumber: 'A2', status: 'occupied' },
-//     { id: 3, seatNumber: 'A3', status: 'available' },
-//     { id: 4, seatNumber: 'A4', status: 'available' },
-//     { id: 5, seatNumber: 'A5', status: 'occupied' },
-//     { id: 6, seatNumber: 'A6', status: 'maintenance' },
-//     { id: 7, seatNumber: 'A7', status: 'available' },
-//     { id: 8, seatNumber: 'A8', status: 'available' },
-//
-//     // Row 2 - B1 to B8
-//     { id: 9, seatNumber: 'B1', status: 'occupied' },
-//     { id: 10, seatNumber: 'B2', status: 'available' },
-//     { id: 11, seatNumber: 'B3', status: 'available' },
-//     { id: 12, seatNumber: 'B4', status: 'occupied' },
-//     { id: 13, seatNumber: 'B5', status: 'occupied' },
-//     { id: 14, seatNumber: 'B6', status: 'available' },
-//     { id: 15, seatNumber: 'B7', status: 'available' },
-//     { id: 16, seatNumber: 'B8', status: 'available' },
-//
-//     // Row 3 - C1 to C8
-//     { id: 17, seatNumber: 'C1', status: 'available' },
-//     { id: 18, seatNumber: 'C2', status: 'available' },
-//     { id: 19, seatNumber: 'C3', status: 'occupied' },
-//     { id: 20, seatNumber: 'C4', status: 'occupied' },
-//     { id: 21, seatNumber: 'C5', status: 'available' },
-//     { id: 22, seatNumber: 'C6', status: 'available' },
-//     { id: 23, seatNumber: 'C7', status: 'maintenance' },
-//     { id: 24, seatNumber: 'C8', status: 'available' },
-//
-//     // Row 4 - D1 to D8
-//     { id: 25, seatNumber: 'D1', status: 'available' },
-//     { id: 26, seatNumber: 'D2', status: 'occupied' },
-//     { id: 27, seatNumber: 'D3', status: 'available' },
-//     { id: 28, seatNumber: 'D4', status: 'available' },
-//     { id: 29, seatNumber: 'D5', status: 'occupied' },
-//     { id: 30, seatNumber: 'D6', status: 'available' },
-//     { id: 31, seatNumber: 'D7', status: 'available' },
-//     { id: 32, seatNumber: 'D8', status: 'available' }
-// ];
-
-// DOM Elements
-const seatGrid = document.getElementById('seatGrid');
-const availableCount = document.getElementById('availableCount');
-const occupiedCount = document.getElementById('occupiedCount');
-const selectedCount = document.getElementById('selectedCount');
-const totalSeatsBadge = document.getElementById('totalSeatsBadge');
-const selectedSeatDisplay = document.getElementById('selectedSeatDisplay');
-const selectedSeatPreview = document.getElementById('selectedSeatPreview');
-const selectedSeatNumber = document.getElementById('selectedSeatNumber');
-const reserveBtn = document.getElementById('reserveBtn');
+// Helper function to escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
 // Toast notification
 function showToast(message, type = 'info') {
@@ -77,87 +32,196 @@ function showToast(message, type = 'info') {
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.4s ease';
         setTimeout(() => toast.remove(), 400);
     }, 3000);
 }
 
+// Hardcoded seat data for demonstration
+const HARDCODED_SEATS = [
+    { id: 1, seat_number: 'A1', user: null },
+    { id: 2, seat_number: 'A2', user: { id: 2, email: 'john@example.com' } },
+    { id: 3, seat_number: 'A3', user: null },
+    { id: 4, seat_number: 'A4', user: null },
+    { id: 5, seat_number: 'A5', user: { id: 5, email: 'jane@example.com' } },
+    { id: 6, seat_number: 'A6', user: null },
+    { id: 7, seat_number: 'A7', user: null },
+    { id: 8, seat_number: 'A8', user: null },
+    { id: 9, seat_number: 'B1', user: { id: 9, email: 'bob@example.com' } },
+    { id: 10, seat_number: 'B2', user: null },
+    { id: 11, seat_number: 'B3', user: null },
+    { id: 12, seat_number: 'B4', user: { id: 12, email: 'alice@example.com' } },
+    { id: 13, seat_number: 'B5', user: { id: 13, email: 'charlie@example.com' } },
+    { id: 14, seat_number: 'B6', user: null },
+    { id: 15, seat_number: 'B7', user: null },
+    { id: 16, seat_number: 'B8', user: null },
+    { id: 17, seat_number: 'C1', user: null },
+    { id: 18, seat_number: 'C2', user: null },
+    { id: 19, seat_number: 'C3', user: { id: 19, email: 'david@example.com' } },
+    { id: 20, seat_number: 'C4', user: { id: 20, email: 'eve@example.com' } },
+    { id: 21, seat_number: 'C5', user: null },
+    { id: 22, seat_number: 'C6', user: null },
+    { id: 23, seat_number: 'C7', user: null },
+    { id: 24, seat_number: 'C8', user: null },
+    { id: 25, seat_number: 'D1', user: null },
+    { id: 26, seat_number: 'D2', user: { id: 26, email: 'frank@example.com' } },
+    { id: 27, seat_number: 'D3', user: null },
+    { id: 28, seat_number: 'D4', user: null },
+    { id: 29, seat_number: 'D5', user: { id: 29, email: 'grace@example.com' } },
+    { id: 30, seat_number: 'D6', user: null },
+    { id: 31, seat_number: 'D7', user: null },
+    { id: 32, seat_number: 'D8', user: null }
+];
+
 // Fetch seats from backend or use hardcoded data
 async function fetchSeats() {
+    const token = localStorage.getItem('jwtToken');
+
+    if (!token) {
+        console.warn('No token found, redirecting to login');
+        window.location.href = '/login';
+        return;
+    }
+
     try {
-        // Try to fetch from backend first
-        const response = await fetch(`${API_BASE_URL}/seats`, {
-            // Short timeout to fail fast if backend is not running
-            signal: AbortSignal.timeout(1000)
+        const response = await fetch(API_BASE_URL, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
         });
+
+        console.log('Seats response status:', response.status);
+
+        if (response.status === 401) {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/login';
+            throw new Error('Unauthorized');
+        }
+
+        if (response.status === 403) {
+            console.error('Forbidden ');
+            showToast('You do not have permission to view seats. ', 'error');
+            // Still use hardcoded data for demo
+            const seats = HARDCODED_SEATS.map(seat => ({
+                ...seat,
+                seatNumber: seat.seat_number,
+                reservedBy: seat.user?.email || null,
+                status: seat.user ? 'occupied' : 'available'
+            }));
+            globalSeatsData = seats;
+            seatsData = seats;
+            renderSeats(seats);
+            updateStats(seats);
+            return seats;
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         const data = await response.json();
-        seatsData = data;
-        renderSeats(data);
-        updateStats(data);
-        showToast('✅ Connected to backend!', 'success');
-        return data;
+        console.log('Seats raw data received:', data);
+
+        let seats;
+        if (Array.isArray(data)) {
+            seats = data;
+        } else if (data.content && Array.isArray(data.content)) {
+            seats = data.content;
+        } else if (data.seats && Array.isArray(data.seats)) {
+            seats = data.seats;
+        } else if (data.data && Array.isArray(data.data)) {
+            seats = data.data;
+        } else {
+            const values = Object.values(data);
+            seats = (values.length > 0 && Array.isArray(values[0])) ? values[0] : [];
+        }
+
+        // Normalize seat data
+        seats = seats.map(seat => ({
+            id: seat.id,
+            seatNumber: seat.seat_number || seat.seatNumber || seat.number || 'N/A',
+            seat_number: seat.seat_number || seat.seatNumber || seat.number || 'N/A',
+            user: seat.user || null,
+            reservedBy: seat.user?.email || seat.reservedBy || null,
+            status: seat.user ? 'occupied' : 'available'
+        }));
+
+        globalSeatsData = seats;
+        seatsData = seats;
+        console.log('Processed seats:', seats.length);
+
+        renderSeats(seats);
+        updateStats(seats);
+        showToast(`Loaded ${seats.length} seats from server`, 'success');
+        return seats;
+
     } catch (error) {
-        console.log('Backend not available, using hardcoded data:', error.message);
-        // Use hardcoded data
-        seatsData = HARDCODED_SEATS;
-        renderSeats(seatsData);
-        updateStats(seatsData);
-        showToast('📚 Using demo data (backend not available)', 'info');
-        return seatsData;
+        console.log('Backend not available or error:', error.message);
+        // Use hardcoded data as fallback
+        const seats = HARDCODED_SEATS.map(seat => ({
+            ...seat,
+            seatNumber: seat.seat_number,
+            reservedBy: seat.user?.email || null,
+            status: seat.user ? 'occupied' : 'available'
+        }));
+        globalSeatsData = seats;
+        seatsData = seats;
+        renderSeats(seats);
+        updateStats(seats);
+        showToast('Using demo data (backend not available)', 'info');
+        return seats;
     }
 }
 
 // Render seats
 function renderSeats(seats) {
+    const seatsGridElement = document.getElementById('seatGrid');
+    if (!seatsGridElement) {
+        console.error('Seats grid element not found');
+        return;
+    }
+
     if (!seats || seats.length === 0) {
-        seatGrid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #63738e;">
-                        <div style="font-size: 2.5rem; margin-bottom: 12px;">
-                            <i class="fas fa-chair"></i>
-                        </div>
-                        <p style="font-size: 0.95rem;">No seats available. Please add seats to the system.</p>
-                    </div>
-                `;
+        seatsGridElement.innerHTML = '<div class="loading-text">No seats available</div>';
         return;
     }
 
-    // Filter seats if search is active
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const filteredSeats = seats.filter(seat =>
-        seat.seatNumber.toLowerCase().includes(searchTerm)
-    );
+    let htmlEl = '';
 
-    if (filteredSeats.length === 0 && searchTerm) {
-        seatGrid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #63738e;">
-                        <div style="font-size: 2rem; margin-bottom: 12px;">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <p style="font-size: 0.95rem;">No seats found matching "${searchTerm}"</p>
-                    </div>
-                `;
-        return;
-    }
-
-    seatGrid.innerHTML = filteredSeats.map(seat => {
+    seats.forEach((seat) => {
+        const seatNumber = seat.seatNumber || seat.seat_number || seat.number || 'N/A';
+        const status = seat.status || (seat.reservedBy ? 'occupied' : 'available');
         const isSelected = selectedSeatId === seat.id;
-        const statusClass = isSelected ? 'selected' : seat.status;
+        const statusClass = isSelected ? 'selected' : status;
+        const statusDisplay = isSelected ? 'selected' : status;
 
-        return `
-                    <div class="seat ${statusClass}" 
-                         data-id="${seat.id}"
-                         onclick="handleSeatClick(${seat.id})"
-                         title="Seat ${seat.seatNumber} - ${seat.status.toUpperCase()}">
-                        <div class="seat-icon">${getSeatIcon(seat.status)}</div>
-                        <div class="seat-number">${seat.seatNumber}</div>
-                        ${seat.status === 'occupied' ? '<div class="badge">occupied</div>' : ''}
-                    </div>
-                `;
-    }).join('');
+        const userEmail = seat.user?.email || seat.reservedBy || '';
+        const displayName = userEmail ? userEmail.split('@')[0] : '';
+
+        const icon = getSeatIcon(statusDisplay);
+
+        htmlEl += `
+            <div class="seat-item" data-seat-id="${seat.id}" style="cursor: pointer;">
+                <div class="seat-icon ${statusClass}">
+                    ${icon}
+                </div>
+                <div class="seat-label">${escapeHtml(seatNumber)}</div>
+                <div class="seat-status-text ${statusClass}">${statusDisplay}${displayName ? ' (' + escapeHtml(displayName) + ')' : ''}</div>
+            </div>
+        `;
+    });
+
+    seatsGridElement.innerHTML = htmlEl;
+
+    document.querySelectorAll('.seat-item').forEach(el => {
+        el.addEventListener('click', function() {
+            const seatId = parseInt(this.dataset.seatId);
+            handleSeatClick(seatId);
+        });
+    });
+
+    console.log('Seats rendered successfully');
 }
 
 // Get seat icon based on status
@@ -175,19 +239,28 @@ function getSeatIcon(status) {
 function updateStats(seats) {
     if (!seats) return;
 
-    const available = seats.filter(s => s.status === 'available').length;
+    const available = seats.filter(s => s.status === 'available' && selectedSeatId !== s.id).length;
     const occupied = seats.filter(s => s.status === 'occupied').length;
-    const selected = seats.filter(s => s.status === 'selected' || selectedSeatId === s.id).length;
+    const selected = seats.filter(s => selectedSeatId === s.id).length;
 
-    availableCount.textContent = available;
-    occupiedCount.textContent = occupied;
-    selectedCount.textContent = selected;
-    totalSeatsBadge.textContent = `${seats.length} seats`;
-}
+    const availableCount = document.getElementById('availableCount');
+    const occupiedCount = document.getElementById('occupiedCount');
+    const selectedCount = document.getElementById('selectedCount');
+    const totalSeatsBadge = document.getElementById('totalSeatsBadge');
+    const selectedSeatDisplay = document.getElementById('selectedSeatDisplay');
 
-// Filter seats
-function filterSeats() {
-    renderSeats(seatsData);
+    if (availableCount) availableCount.textContent = available;
+    if (occupiedCount) occupiedCount.textContent = occupied;
+    if (selectedCount) selectedCount.textContent = selected;
+    if (totalSeatsBadge) totalSeatsBadge.textContent = `${seats.length} seats`;
+    if (selectedSeatDisplay) {
+        if (selectedSeatId) {
+            const seat = seats.find(s => s.id === selectedSeatId);
+            selectedSeatDisplay.textContent = seat ? `Seat ${seat.seatNumber}` : 'None';
+        } else {
+            selectedSeatDisplay.textContent = 'None';
+        }
+    }
 }
 
 // Handle seat click
@@ -195,55 +268,56 @@ function handleSeatClick(seatId) {
     const seat = seatsData.find(s => s.id === seatId);
     if (!seat) return;
 
-    // Prevent selecting occupied or maintenance seats
-    if (seat.status === 'occupied' || seat.status === 'maintenance') {
-        showToast(`Seat ${seat.seatNumber} is ${seat.status}. Cannot select it.`, 'error');
+    if (seat.status === 'occupied') {
+        showToast(`Seat ${seat.seatNumber} is already occupied. Cannot select it.`, 'error');
         return;
     }
 
-    // If clicking the already selected seat, deselect it
     if (selectedSeatId === seatId) {
         clearSelection();
         return;
     }
 
-    // Clear previous selection
-    if (selectedSeatId !== null) {
-        const prevSelected = seatsData.find(s => s.id === selectedSeatId);
-        if (prevSelected) {
-            prevSelected.status = 'available';
-        }
-    }
+    clearSelection(false);
 
-    // Select new seat
     selectedSeatId = seatId;
     seat.status = 'selected';
 
-    // Update UI
     renderSeats(seatsData);
     updateStats(seatsData);
 
-    selectedSeatDisplay.textContent = `Seat ${seat.seatNumber}`;
-    selectedSeatPreview.style.display = 'flex';
-    selectedSeatNumber.textContent = `Seat ${seat.seatNumber}`;
-    reserveBtn.disabled = false;
+    const selectedSeatDisplay = document.getElementById('selectedSeatDisplay');
+    const selectedSeatPreview = document.getElementById('selectedSeatPreview');
+    const selectedSeatNumber = document.getElementById('selectedSeatNumber');
+    const reserveBtn = document.getElementById('reserveBtn');
+
+    if (selectedSeatDisplay) selectedSeatDisplay.textContent = `Seat ${seat.seatNumber}`;
+    if (selectedSeatPreview) selectedSeatPreview.style.display = 'flex';
+    if (selectedSeatNumber) selectedSeatNumber.textContent = `Seat ${seat.seatNumber}`;
+    if (reserveBtn) reserveBtn.disabled = false;
 
     showToast(`Seat ${seat.seatNumber} selected! Click Reserve to confirm.`, 'info');
 }
 
 // Clear selection
-function clearSelection() {
+function clearSelection(shouldRender = true) {
     if (selectedSeatId !== null) {
         const seat = seatsData.find(s => s.id === selectedSeatId);
-        if (seat) {
+        if (seat && seat.status === 'selected') {
             seat.status = 'available';
         }
         selectedSeatId = null;
-        renderSeats(seatsData);
-        updateStats(seatsData);
-        selectedSeatDisplay.textContent = 'None';
-        selectedSeatPreview.style.display = 'none';
-        reserveBtn.disabled = true;
+
+        const selectedSeatPreview = document.getElementById('selectedSeatPreview');
+        const reserveBtn = document.getElementById('reserveBtn');
+
+        if (selectedSeatPreview) selectedSeatPreview.style.display = 'none';
+        if (reserveBtn) reserveBtn.disabled = true;
+
+        if (shouldRender) {
+            renderSeats(seatsData);
+            updateStats(seatsData);
+        }
     }
 }
 
@@ -257,22 +331,24 @@ async function reserveSeat() {
     const seat = seatsData.find(s => s.id === selectedSeatId);
     if (!seat) return;
 
-    if (seat.status === 'occupied' || seat.status === 'maintenance') {
+    if (seat.status === 'occupied') {
         showToast(`Seat ${seat.seatNumber} is no longer available.`, 'error');
         clearSelection();
-        refreshSeats();
+        await fetchSeats();
         return;
     }
 
+    const token = localStorage.getItem('jwtToken');
+
     try {
-        const response = await fetch(`${API_BASE_URL}/seats/${selectedSeatId}/reserve`, {
+        const response = await fetch(`${API_BASE_URL}/${selectedSeatId}/reserve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                userId: userId,
-                seatId: selectedSeatId
+                userId: userId
             })
         });
 
@@ -282,87 +358,98 @@ async function reserveSeat() {
         }
 
         const result = await response.json();
-        showToast(`✅ Seat ${seat.seatNumber} reserved successfully!`, 'success');
+        showToast(`Seat ${seat.seatNumber} reserved successfully!`, 'success');
 
-        // Update the seat status in local data
         seat.status = 'occupied';
+        seat.reservedBy = localStorage.getItem('userEmail') || 'current_user';
+        seat.user = { email: localStorage.getItem('userEmail') || 'current_user' };
         selectedSeatId = null;
+
         renderSeats(seatsData);
         updateStats(seatsData);
-        selectedSeatDisplay.textContent = 'None';
-        selectedSeatPreview.style.display = 'none';
-        reserveBtn.disabled = true;
+
+        const selectedSeatDisplay = document.getElementById('selectedSeatDisplay');
+        const selectedSeatPreview = document.getElementById('selectedSeatPreview');
+        const reserveBtn = document.getElementById('reserveBtn');
+
+        if (selectedSeatDisplay) selectedSeatDisplay.textContent = 'None';
+        if (selectedSeatPreview) selectedSeatPreview.style.display = 'none';
+        if (reserveBtn) reserveBtn.disabled = true;
 
     } catch (error) {
         console.error('Error reserving seat:', error);
-        showToast(`❌ Failed to reserve seat: ${error.message}`, 'error');
-        // If backend fails, still update locally for demo
-        if (seat) {
-            seat.status = 'occupied';
-            selectedSeatId = null;
-            renderSeats(seatsData);
-            updateStats(seatsData);
-            selectedSeatDisplay.textContent = 'None';
-            selectedSeatPreview.style.display = 'none';
-            reserveBtn.disabled = true;
-            showToast('ℹ️ Seat updated locally (demo mode)', 'info');
-        }
+        showToast(`Failed to reserve seat: ${error.message}`, 'error');
     }
 }
 
 // Refresh seats
 async function refreshSeats() {
-    showToast('🔄 Refreshing seat data...', 'info');
+    showToast('Refreshing seat data...', 'info');
     clearSelection();
     await fetchSeats();
-    if (seatsData === HARDCODED_SEATS) {
-        showToast('📚 Using demo data', 'info');
-    } else {
-        showToast('✅ Seats updated!', 'success');
-    }
+    showToast('Seats updated!', 'success');
 }
 
+function checkTokenAndRole() {
+    const token = localStorage.getItem('jwtToken');
+    const role = localStorage.getItem('role');
+    const email = localStorage.getItem('userEmail');
+
+    console.log('🔍 Auth Debug:');
+    console.log('  Token:', token ? token.substring(0, 30) + '...' : 'NOT FOUND');
+    console.log('  Role:', role || 'NOT FOUND');
+    console.log('  Email:', email || 'NOT FOUND');
+
+    if (!token) {
+        console.warn('⚠️ No token found!');
+    }
+
+    return { token, role, email };
+}
 // Initialize
 async function init() {
+    const { token, role, email } = checkTokenAndRole();
+
+    if (!token) {
+        console.warn('No token found, redirecting to login');
+        window.location.href = '/login';
+        return;
+    }
+
+    // If role is missing, try to get it from token (decode)
+    if (!role) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log('Decoded token:', payload);
+            const extractedRole = payload.role || payload.authorities || 'USER';
+            localStorage.setItem('role', extractedRole);
+        } catch (e) {
+            console.error('Could not decode token:', e);
+        }
+    }
+
+    // Continue with initialization
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    if (userNameDisplay) {
+        userNameDisplay.textContent = (email || 'user').split('@')[0];
+    }
+
+
     await fetchSeats();
 
-    // Auto-refresh every 30 seconds (only if connected to backend)
-    setInterval(async () => {
-        // Only auto-refresh if we're not using hardcoded data
-        if (seatsData !== HARDCODED_SEATS) {
-            if (selectedSeatId === null) {
-                await fetchSeats();
-            } else {
-                // If user has a selection, just update without clearing selection
-                try {
-                    const response = await fetch(`${API_BASE_URL}/seats`, {
-                        signal: AbortSignal.timeout(2000)
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        const selected = data.find(s => s.id === selectedSeatId);
-                        if (selected && selected.status === 'available') {
-                            selected.status = 'selected';
-                        } else if (!selected || selected.status === 'occupied') {
-                            showToast(`Seat ${selectedSeatId} is no longer available`, 'error');
-                            clearSelection();
-                        }
-                        seatsData = data;
-                        renderSeats(seatsData);
-                        updateStats(seatsData);
-                    }
-                } catch (error) {
-                    console.error('Auto-refresh failed:', error);
-                }
-            }
-        }
-    }, 30000);
+    const reserveBtn = document.getElementById('reserveBtn');
+    if (reserveBtn) {
+        reserveBtn.addEventListener('click', reserveSeat);
+    }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshSeats);
+    }
+
+    console.log('Library Seat Reservation System initialized');
+    console.log('Backend API:', API_BASE_URL);
+    console.log('User ID:', userId);
 }
 
-// Start the app
-init();
-
-console.log('📚 Library Seat Reservation System');
-console.log(`📍 Backend API: ${API_BASE_URL}`);
-console.log('👤 User ID:', userId);
-console.log('💡 Using hardcoded demo data if backend is not available');
+document.addEventListener('DOMContentLoaded', init);

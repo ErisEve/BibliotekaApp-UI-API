@@ -67,8 +67,10 @@ public class SecurityConfig {
                         SessionCreationPolicy.STATELESS)) // No sessions
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/static/**").permitAll()
-                        // Secure /api/books/fetch and other book management endpoints - only authenticated users
-                        .requestMatchers("/api/seats").authenticated()
+
+//                        .requestMatchers("/api/seats/**").authenticated()
+                        .requestMatchers("/api/seats/**").permitAll()
+//                        .requestMatchers("/api/seats/**").hasAnyRole("USER", "LIBRARIAN")
 
                         // Add the swagger patterns
                         .requestMatchers(

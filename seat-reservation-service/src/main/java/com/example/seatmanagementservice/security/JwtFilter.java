@@ -27,7 +27,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -46,46 +45,55 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
-        // Check Authorization header
-        if(authHeader != null && authHeader.startsWith("Bearer ")) {
-            // Remove "Bearer "
+        System.out.println("Seat Service - Processing request: " + path);
+        System.out.println("Seat Service - Authorization header: " + authHeader);
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7);
             try {
-                // get username (subject) from token
-                username = jwtUtil.extractUsername(jwtToken);
+                username = jwtUtil.extractEmail(jwtToken);
+                System.out.println("Seat Service - Extracted username: " + username);
+                System.out.println("Seat Service - Extracted roles: " + jwtUtil.extractRoles(jwtToken));
             } catch (Exception e) {
-                System.out.println("Invalid JWT Token: " + e.getMessage());
+                System.out.println("Seat Service - Invalid JWT Token: " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
-        // If token is valid and user is not yet authenticated - Loads user
-        // from DB using username
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            // Validates the JWT against that user
-            if(jwtUtil.validateToken(jwtToken,userDetails)) {
-                System.out.println("JWT validated for user: " + username);
+            if (jwtUtil.validateToken(jwtToken, userDetails)) {
+                System.out.println("Seat Service - JWT validated for user: " + username);
 
-                // Extract roles from token and convert them to GrantedAuthority
                 List<String> roles = jwtUtil.extractRoles(jwtToken);
-                List<GrantedAuthority> authorities = roles.stream()
+                System.out.println("Seat Service - Roles extracted: " + roles);
+
+                List<String> properRoles = roles.stream()
+                        .filter(role -> !role.startsWith("ID_"))
+                        .collect(Collectors.toList());
+
+                // If no proper role found, use the first role
+                if (properRoles.isEmpty() && !roles.isEmpty()) {
+                    properRoles = List.of(roles.get(0));
+                }
+
+                List<GrantedAuthority> authorities = properRoles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .collect(Collectors.toList());
 
-                // Creates a Spring Security Authentication token
+                System.out.println("Seat Service - Authorities: " + authorities);
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-               // Stores it in the security context, marking the user as authenticated
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                System.out.println("Seat Service - JWT validation failed for user: " + username);
             }
         }
 
-        // Pass the request to the next filter
-        filterChain.doFilter(request,response);
-
-
+        filterChain.doFilter(request, response);
     }
 }
