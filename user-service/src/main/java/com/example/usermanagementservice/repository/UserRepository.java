@@ -3,7 +3,9 @@ package com.example.usermanagementservice.repository;
 import com.example.usermanagementservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +22,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             ORDER BY book_count DESC
             """, nativeQuery = true)
     List<Object[]> findUserRoleAndBookCount();
+
+    @Query(value = """
+            UPDATE users SET email = :newEmail, password_hash = :newPassword WHERE id = :userId
+                        """, nativeQuery = true)
+    User updateEmailAndPassword(@Param("userId") Long userId,
+                               @Param("newEmail") String newEmail,
+                               @Param("newPassword") String newPassword);
 
 }

@@ -29,17 +29,17 @@ public class GatewayRoutesConfig {
                                         .setName("libraryServiceCB")
                                         .setFallbackUri("forward:/fallback/books"))
                                 .stripPrefix(0))
-                        .uri("lb://library-service"))
+                        .uri("lb://library-management-service"))
 
                 // Loan Service
                 .route("loan-management-service", r -> r
-                        .path("/api/loans/**")
+                        .path("/api/lendings/**")
                         .filters(f -> f
                                 .circuitBreaker(config -> config
                                         .setName("loanServiceCB")
                                         .setFallbackUri("forward:/fallback/loans"))
                                 .stripPrefix(0))
-                        .uri("lb://loan-service"))
+                        .uri("lb://loan-management-service"))
 
                 // Seat Service
                 .route("seat-management-service", r -> r
@@ -49,7 +49,7 @@ public class GatewayRoutesConfig {
                                         .setName("seatServiceCB")
                                         .setFallbackUri("forward:/fallback/seats"))
                                 .stripPrefix(0))
-                        .uri("lb://seat-service"))
+                        .uri("lb://seat-management-service"))
 
                 // Ui Service (Default)
                 .route("ui-service", r -> r

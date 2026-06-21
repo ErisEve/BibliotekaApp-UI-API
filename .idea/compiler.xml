@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="gateway-service" />
+        <module name="eureka-discovery-server" />
+      </profile>
+      <profile name="Annotation profile for library-management-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
+        <module name="seat-service" />
+        <module name="user-service" />
+        <module name="library-management-service" />
+        <module name="loan-service" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="backend" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="BibliotekaUI" options="-parameters" />
+      <module name="BibliotekaUI.main" options="-parameters" />
+      <module name="BibliotekaUI.test" options="-parameters" />
+      <module name="backend" options="-parameters" />
+      <module name="eureka-discovery-server" options="-parameters" />
+      <module name="gateway-service" options="-parameters" />
+      <module name="library-management-service" options="-parameters" />
+      <module name="loan-service" options="-parameters" />
+      <module name="seat-service" options="-parameters" />
+      <module name="user-service" options="-parameters" />
+    </option>
+  </component>
+</project>

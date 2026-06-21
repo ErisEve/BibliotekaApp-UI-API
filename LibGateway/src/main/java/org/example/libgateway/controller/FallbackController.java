@@ -27,16 +27,16 @@ public class FallbackController {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "error");
         response.put("message", "Library service is temporarily unavailable. Please try again later.");
-        response.put("service", "library-service");
+        response.put("service", "library-management-service");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
-    @GetMapping("/loans")
+    @GetMapping("/lendings")
     public ResponseEntity<Map<String, Object>> loanServiceFallback() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "error");
         response.put("message", "Loan service is temporarily unavailable. Please try again later.");
-        response.put("service", "loan-service");
+        response.put("service", "loan-management-service");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
@@ -45,7 +45,7 @@ public class FallbackController {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "error");
         response.put("message", "Seat service is temporarily unavailable. Please try again later.");
-        response.put("service", "seat-service");
+        response.put("service", "seat-management-service");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 

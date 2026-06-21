@@ -1,21 +1,33 @@
 package com.example.usermanagementservice.controller;
 
 import com.example.usermanagementservice.config.FeignConfig;
+import com.example.usermanagementservice.dto.UpdateUserRequest;
 import com.example.usermanagementservice.dto.UserActivityDTO;
 import com.example.usermanagementservice.model.User;
 import com.example.usermanagementservice.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081", "http://localhost:8083", "http://localhost:8084"})
+//@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081", "http://localhost:8083", "http://localhost:8084"})
 public class UserController {
 
     private final UserService userService;
@@ -43,5 +55,30 @@ public class UserController {
     @GetMapping("/findByEmail/{email}")
     public Optional<User> findByEmail(@PathVariable String email){
         return userService.findByEmail(email);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<Map<String, Object>> updateUser(@Valid @RequestBody UpdateUserRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = auth.getName();
+
+        User currentUser = userService.findByEmail(currentEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Map<String, Object> response = new HashMap<>();
+
+        // Case 1: Update both email and password
+        if (request.getEmail() != null && request.getPassword() != null) {
+            User updatedUser = userService.updateEmailAndPassword(
+                    currentUser.getId(),
+                    request.getEmail(),
+                    request.getPassword()
+            );
+            response.put("message", "Email and password updated successfully");
+            response.put("user", updatedUser);
+            response.put("newEmail", updatedUser.getEmail());
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.ok(response);
     }
 }

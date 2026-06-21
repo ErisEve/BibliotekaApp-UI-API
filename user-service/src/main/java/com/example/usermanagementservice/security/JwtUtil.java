@@ -41,7 +41,24 @@ public class JwtUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
+//    public String generateToken(User user) {
+//        Map<String, Object> claims = new HashMap<>();
+//        claims.put("userId", user.getId());  // ← ADD USER ID
+//        claims.put("email", user.getEmail());
+//        claims.put("roles", List.of(user.getRole()));
+//
+//        return Jwts.builder()
+//                .setClaims(claims)
+//                .setSubject(user.getEmail())
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+//                .signWith(getSigningKey())
+//                .compact();
+//    }
+    public Long extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", Long.class);
+    }
     // Extract username from token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

@@ -94,7 +94,7 @@ public class AuthController {
                 role = role.substring(5);
             }
             System.out.println("Role extracted: " + role);
-
+//            User newUser = new User(loginRequest.getEmail(), loginRequest.getPassword());
             // Generate token
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("JWT generated: " + token);

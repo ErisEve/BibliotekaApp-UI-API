@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/BibliotekaUI/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LibGateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/eureka-discovery-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/library-management-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/loan-management-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/seat-reservation-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/user-service/src/main/java" charset="UTF-8" />
+  </component>
+</project>

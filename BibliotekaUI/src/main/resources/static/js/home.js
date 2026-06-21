@@ -99,7 +99,7 @@ function searchBooks() {
     }
 
     const token = localStorage.getItem('jwtToken');
-    const searchApiUrl = `http://localhost:8081/api/books/search?keyword=${encodeURIComponent(keyword)}`;
+    const searchApiUrl = `http://localhost:8080/api/books/search?keyword=${encodeURIComponent(keyword)}`;
 
     console.log('🔍 Searching for:', keyword);
 
@@ -215,8 +215,8 @@ function renderBooksGrid1(booksData) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Dashboard initialized');
 
-    const booksApiUrl = 'http://localhost:8081/api/books/booksAll';
-    const loansApiUrl = 'http://localhost:8083/api/lendings';
+    const booksApiUrl = 'http://localhost:8080/api/books/booksAll';
+    const loansApiUrl = 'http://localhost:8080/api/lendings';
     const token = localStorage.getItem('jwtToken');
 
     // Check authentication
@@ -698,6 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ---- EDIT MODAL ----
     const modalOverlay = document.getElementById('editModal');
     const openModalBtn = document.getElementById('editUserBtn');
+    const submitChangesBtn = document.getElementById('submitUserChanges');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelModalBtn = document.getElementById('cancelModalBtn');
     const editForm = document.getElementById('editForm');
@@ -721,6 +722,17 @@ document.addEventListener('DOMContentLoaded', function() {
             isMenuOpen = false;
             if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
         }
+
+        // Pre-fill current email if available
+        if (emailInput) {
+            const currentEmail = localStorage.getItem('userEmail');
+            if (currentEmail) {
+                emailInput.value = currentEmail;
+            }
+        }
+        // Clear password fields
+        if (passwordInput) passwordInput.value = '';
+        if (confirmInput) confirmInput.value = '';
     }
 
     if (closeModalBtn && modalOverlay) {
@@ -752,8 +764,57 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // ---- API CALL TO UPDATE USER ----
+    async function updateUserApi(userData) {
+        const token = localStorage.getItem('jwtToken');
+
+        if (!token) {
+            throw new Error('User not authenticated. Please login again.');
+        }
+
+        try {
+            const response = await fetch('http://localhost:8080/api/users/update', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401) {
+                    throw new Error('Session expired. Please login again.');
+                } else if (response.status === 409) {
+                    throw new Error('Email already in use by another account.');
+                } else {
+                    throw new Error(errorData.message || 'Failed to update profile.');
+                }
+            }
+
+            const data = await response.json();
+
+            // Update stored token if it was refreshed
+            if (data.newToken) {
+                localStorage.setItem('jwtToken', data.newToken);
+            }
+
+            // Update stored email if changed
+            if (userData.email) {
+                localStorage.setItem('userEmail', userData.email);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Update error:', error);
+            throw error;
+        }
+    }
+
+    // ---- EDIT FORM SUBMIT ----
     if (editForm) {
-        editForm.addEventListener('submit', function(e) {
+        editForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             let hasError = false;
@@ -793,17 +854,54 @@ document.addEventListener('DOMContentLoaded', function() {
                     toast.style.display = 'block';
                     toast.style.background = '#fce3df';
                     toast.style.color = '#b13a2e';
-                    toast.textContent = 'Please fix the highlighted fields.';
+                    toast.textContent = 'Lose uneseni podaci.';
                     return;
                 }
 
-                toast.style.background = '#def0e6';
-                toast.style.color = '#1a6e4a';
-                toast.textContent = '✅ Changes saved successfully!';
+                // Show loading state
                 toast.style.display = 'block';
+                toast.style.background = '#4299e1';
+                toast.style.color = 'white';
+                toast.textContent = 'Azuriranje...';
             }
 
-            setTimeout(closeModal, 1200);
+            try {
+                // Prepare data for API
+                const updateData = {
+                    email: email
+                };
+
+                if (password && password.length >= 6) {
+                    updateData.password = password;
+                }
+
+                // Call API
+                const result = await updateUserApi(updateData);
+                console.log(result);
+
+                // Success
+                if (toast) {
+                    toast.style.background = '#def0e6';
+                    toast.style.color = '#1a6e4a';
+                    toast.textContent = '✅ Profile updated successfully!';
+                }
+
+                // Close modal after success
+                // setTimeout(() => {
+                //     closeModal();
+                //     // Optionally refresh page or update UI
+                //     // window.location.reload();
+                // }, 1200);
+
+            } catch (error) {
+                // Error
+                if (toast) {
+                    toast.style.background = '#fce3df';
+                    toast.style.color = '#b13a2e';
+                    toast.textContent = `❌ ${error.message}`;
+                }
+                console.error('Update error:', error);
+            }
         });
     }
 

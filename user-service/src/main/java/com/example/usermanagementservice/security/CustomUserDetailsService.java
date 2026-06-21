@@ -33,7 +33,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 });
         List<GrantedAuthority> authorities = List.of(
                 // role stored as USER or ADMIN
-                new SimpleGrantedAuthority("ROLE_" + user.getRole())
+                new SimpleGrantedAuthority("ROLE_" + user.getRole()),
+                new SimpleGrantedAuthority("ID_"+user.getId())
         );
 
         System.out.println("User found: " + user.getEmail());

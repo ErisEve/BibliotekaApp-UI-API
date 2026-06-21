@@ -31,7 +31,7 @@ spring:
         # LIBRARY SERVICE (BOOKS) ROUTES
         # ============================================
         - id: library-management-service
-          uri: lb://library-service
+          uri: lb://library-management-service
           predicates:
             - Path=/api/books/**
           filters:
@@ -45,9 +45,9 @@ spring:
         # LOAN SERVICE ROUTES
         # ============================================
         - id: loan-management-service
-          uri: lb://loan-service
+          uri: lb://loan-management-service
           predicates:
-            - Path=/api/loans/**
+            - Path=/api/lendings/**
           filters:
             - name: CircuitBreaker
               args:
@@ -59,7 +59,7 @@ spring:
         # SEAT SERVICE ROUTES
         # ============================================
         - id: seat-management-service
-          uri: lb://seat-service
+          uri: lb://seat-management-service
           predicates:
             - Path=/api/seats/**
           filters:
