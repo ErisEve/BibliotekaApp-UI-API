@@ -4,9 +4,12 @@
 const booksGridElement = document.getElementById('booksgrid');
 let globalBooksData = [];
 let globalLoansData = [];
+let token;
+const booksApiUrl = 'http://localhost:8080/api/books/booksAll';
+const loansApiUrl = 'http://localhost:8080/api/lendings';
 
 // ========================================
-// BOOK DETAIL MODAL
+// OPEN BOOK DETAIL MODAL
 // ========================================
 function openBookDetailModal(book) {
     console.log('Opening book detail modal for:', book.title);
@@ -69,12 +72,14 @@ function openBookDetailModal(book) {
     }
     localStorage.setItem('currentBookId', book.id);
 
+    // ✅ Remove old event listener to prevent duplicates
     const loanForm = document.getElementById('loanForm');
     if (loanForm) {
-        loanForm.addEventListener('submit', makeANewLoan);
-    }
-    if (loanForm) {
-        loanForm.dataset.bookId = book.id || book.bookId || '';
+        // Remove existing listener to avoid multiple submissions
+        const newLoanForm = loanForm.cloneNode(true);
+        loanForm.parentNode.replaceChild(newLoanForm, loanForm);
+        newLoanForm.addEventListener('submit', makeANewLoan);
+        newLoanForm.dataset.bookId = book.id || book.bookId || '';
     }
 
     const loanDays = document.getElementById('loanDays');
@@ -95,17 +100,16 @@ function openBookDetailModal(book) {
 function makeANewLoan(event) {
     event.preventDefault();
 
-    const token = localStorage.getItem('jwtToken');
+    token = localStorage.getItem('jwtToken');
     if (!token) {
         alert('Morate biti prijavljeni', 'error');
         return;
     }
 
-    // Get email based on role
     const role = localStorage.getItem('role') || 'USER';
     let email;
     if (role === 'USER') {
-        email = localStorage.getItem('userEmail') ;
+        email = localStorage.getItem('userEmail');
     } else {
         email = document.getElementById('loanUserEmail2').value.trim();
     }
@@ -122,11 +126,17 @@ function makeANewLoan(event) {
         return;
     }
 
-    // Get book ID from wherever you store it (modal or variable)
     const bookId = localStorage.getItem('currentBookId');
     if (!bookId) {
         alert('Greska: knjiga nije odabrana');
         return;
+    }
+
+    // ✅ Disable the submit button to prevent double submissions
+    const submitBtn = document.querySelector('#loanForm button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     }
 
     fetch('http://localhost:8080/api/lendings/loanABook', {
@@ -136,7 +146,7 @@ function makeANewLoan(event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            token:token,
+            token: token,
             bookId: parseInt(bookId),
             userEmail: email,
             days: days
@@ -149,10 +159,25 @@ function makeANewLoan(event) {
             return response.json();
         })
         .then(data => {
-            setTimeout(() => location.reload(), 1500);
+            // ✅ Close modal immediately
+            closeBookDetailModal();
+
+            // ✅ Show success message
+            showToast('Knjiga uspesno pozajmljena!', 'success');
+
+            // ✅ Refresh data after a short delay
+            setTimeout(() => {
+                fetchAllBooks().then(() => fetchLoanedBooks());
+            }, 500);
+            window.location.reload();
         })
         .catch(error => {
             alert('Greska: ' + error.message);
+            // ✅ Re-enable the submit button on error
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Loan Book';
+            }
         });
 }
 
@@ -179,7 +204,7 @@ function searchBooks() {
         return;
     }
 
-    const token = localStorage.getItem('jwtToken');
+    token = localStorage.getItem('jwtToken');
     const searchApiUrl = `http://localhost:8080/api/books/search?keyword=${encodeURIComponent(keyword)}`;
 
     console.log('Searching for:', keyword);
@@ -291,14 +316,94 @@ function renderBooksGrid1(booksData) {
 }
 
 // ========================================
+// FETCH ALL BOOKS
+// ========================================
+function fetchAllBooks() {
+    console.log('Fetching books...');
+
+    if (!booksGridElement) {
+        console.error('booksGridElement is null');
+        return Promise.reject('booksGridElement is null');
+
+    }
+
+    booksGridElement.innerHTML = '<div class="loading-text">Loading books...</div>';
+    if (!token) {
+        booksGridElement.innerHTML = '<div class="error-text">Not authenticated. Please login.</div>';
+        return Promise.reject('Not authenticated');
+    }
+    return fetch(booksApiUrl, {
+        method: 'GET',
+        headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            console.log('Books response status:', response.status);
+
+            if (response.status === 401) {
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/login';
+                throw new Error('Unauthorized');
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Books raw data received');
+
+            let books;
+            if (Array.isArray(data)) {
+                books = data;
+            } else if (data.content && Array.isArray(data.content)) {
+                books = data.content;
+            } else if (data.books && Array.isArray(data.books)) {
+                books = data.books;
+            } else if (data.data && Array.isArray(data.data)) {
+                books = data.data;
+            } else {
+                const values = Object.values(data);
+                books = (values.length > 0 && Array.isArray(values[0])) ? values[0] : [];
+            }
+
+            globalBooksData = books;
+            console.log('Processed books:', books.length);
+
+            // Update stats
+            const totalBooks = document.getElementById('totalBooks');
+            if (totalBooks) totalBooks.textContent = books.length;
+
+            const distinctAuthors = document.getElementById('distinctAuthors');
+            if (distinctAuthors) {
+                distinctAuthors.textContent = [...new Set(books.map(book => book.author))].filter(Boolean).length;
+            }
+
+            if (!books || books.length === 0) {
+                booksGridElement.innerHTML = '<div class="loading-text">No books found</div>';
+                return books;
+            }
+
+            return books;
+        })
+        .catch(error => {
+            console.error('Error fetching books:', error);
+            if (booksGridElement) {
+                booksGridElement.innerHTML = `<div class="error-text">Failed to load books: ${error.message}</div>`;
+            }
+            throw error;
+        });
+}
+
+// ========================================
 // WAIT FOR DOM TO LOAD
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard initialized');
 
-    const booksApiUrl = 'http://localhost:8080/api/books/booksAll';
-    const loansApiUrl = 'http://localhost:8080/api/lendings';
-    const token = localStorage.getItem('jwtToken');
+    token = localStorage.getItem('jwtToken');
 
     // Check authentication
     if (!token) {
@@ -355,88 +460,6 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchAllBooks()
         .then(() => fetchLoanedBooks())
         .catch(error => console.error('Initial load error:', error));
-
-    // ========================================
-    // FETCH ALL BOOKS
-    // ========================================
-    function fetchAllBooks() {
-        console.log('Fetching books...');
-
-        if (!booksGridElement) {
-            console.error('booksGridElement is null');
-            return Promise.reject('booksGridElement is null');
-
-        }
-
-        booksGridElement.innerHTML = '<div class="loading-text">Loading books...</div>';
-        if (!token) {
-            booksGridElement.innerHTML = '<div class="error-text">Not authenticated. Please login.</div>';
-            return Promise.reject('Not authenticated');
-        }
-        return fetch(booksApiUrl, {
-            method: 'GET',
-            headers: {
-                'accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(response => {
-                console.log('Books response status:', response.status);
-
-                if (response.status === 401) {
-                    localStorage.removeItem('jwtToken');
-                    window.location.href = '/login';
-                    throw new Error('Unauthorized');
-                }
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Books raw data received');
-
-                let books;
-                if (Array.isArray(data)) {
-                    books = data;
-                } else if (data.content && Array.isArray(data.content)) {
-                    books = data.content;
-                } else if (data.books && Array.isArray(data.books)) {
-                    books = data.books;
-                } else if (data.data && Array.isArray(data.data)) {
-                    books = data.data;
-                } else {
-                    const values = Object.values(data);
-                    books = (values.length > 0 && Array.isArray(values[0])) ? values[0] : [];
-                }
-
-                globalBooksData = books;
-                console.log('Processed books:', books.length);
-
-                // Update stats
-                const totalBooks = document.getElementById('totalBooks');
-                if (totalBooks) totalBooks.textContent = books.length;
-
-                const distinctAuthors = document.getElementById('distinctAuthors');
-                if (distinctAuthors) {
-                    distinctAuthors.textContent = [...new Set(books.map(book => book.author))].filter(Boolean).length;
-                }
-
-                if (!books || books.length === 0) {
-                    booksGridElement.innerHTML = '<div class="loading-text">No books found</div>';
-                    return books;
-                }
-
-                return books;
-            })
-            .catch(error => {
-                console.error('Error fetching books:', error);
-                if (booksGridElement) {
-                    booksGridElement.innerHTML = `<div class="error-text">Failed to load books: ${error.message}</div>`;
-                }
-                throw error;
-            });
-    }
 
     // ========================================
     // FETCH LOANED BOOKS
@@ -550,10 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========================================
-// RENDER LOANS GRID - SORTED BY RETURN DATE
-// ========================================
-    // ========================================
-// RENDER LOANS GRID - WITH HOVER & RETURN
+// RENDER LOANS GRID
 // ========================================
     function renderLoansGrid(loansData) {
         console.log('Rendering loans, count:', loansData ? loansData.length : 0);
@@ -735,53 +755,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
     }// ========================================
-// SHOW TOAST NOTIFICATION
+
+
 // ========================================
-    function showToast(message, type = 'info') {
-        let toast = document.getElementById('globalToast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'globalToast';
-            toast.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            z-index: 9999;
-            max-width: 400px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
-            transform: translateY(100px);
-            opacity: 0;
-            font-family: 'Inter', sans-serif;
-        `;
-            document.body.appendChild(toast);
-        }
-
-        const colors = {
-            success: { bg: '#def0e6', text: '#1a6e4a', icon: '' },
-            error: { bg: '#fce3df', text: '#b13a2e', icon: '' },
-            info: { bg: '#eaf0fa', text: '#1e2a4a', icon: '' }
-        };
-        const color = colors[type] || colors.info;
-
-        toast.style.background = color.bg;
-        toast.style.color = color.text;
-        toast.textContent = `${message}`;
-        toast.style.transform = 'translateY(0)';
-        toast.style.opacity = '1';
-
-        clearTimeout(toast._timeout);
-        toast._timeout = setTimeout(() => {
-            toast.style.transform = 'translateY(100px)';
-            toast.style.opacity = '0';
-        }, 4000);
-    }
-    // ========================================
-    // RENDER BOOKS GRID
-    // ========================================
+// RENDER BOOKS GRID - FIXED
+// ========================================
     function renderBooksGrid(booksData) {
         console.log('Rendering books, count:', booksData ? booksData.length : 0);
 
@@ -794,6 +772,9 @@ document.addEventListener('DOMContentLoaded', function() {
             booksGridElement.innerHTML = '<div class="loading-text">No books available</div>';
             return;
         }
+
+        // ✅ Store the data for click handler
+        globalBooksData = booksData;
 
         let htmlEl = '';
 
@@ -816,24 +797,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 : `<i class="fas fa-book-open"></i>`;
 
             htmlEl += `
-                <div class="book-card" data-index="${index}" style="cursor: pointer;">
-                    <div class="book-cover">
-                        ${coverHtml}
-                    </div>
-                    <h4>${escapeHtml(title)}</h4>
-                    <div class="author">${escapeHtml(author)}</div>
-                    <div class="book-meta">
-                        <span><i class="fas fa-hashtag"></i> ${escapeHtml(isbn)}</span>
-                        <span class="status-badge ${availability}">${availability}</span>
-                    </div>
+            <div class="book-card" data-index="${index}" style="cursor: pointer;">
+                <div class="book-cover">
+                    ${coverHtml}
                 </div>
-            `;
+                <h4>${escapeHtml(title)}</h4>
+                <div class="author">${escapeHtml(author)}</div>
+                <div class="book-meta">
+                    <span><i class="fas fa-hashtag"></i> ${escapeHtml(isbn)}</span>
+                    <span class="status-badge ${availability}">${availability}</span>
+                </div>
+            </div>
+        `;
         });
 
         booksGridElement.innerHTML = htmlEl;
         console.log('Books rendered successfully');
     }
 
+// ========================================
+// HANDLE BOOK CARD CLICK - FIXED
+// ========================================
+    function handleBookCardClick(e) {
+        const card = e.target.closest('.book-card');
+        if (!card) return;
+
+        const index = parseInt(card.dataset.index);
+        if (isNaN(index)) {
+            console.warn('Invalid index on card');
+            return;
+        }
+
+        // ✅ Use the correct data source
+        if (!globalBooksData || !globalBooksData[index]) {
+            console.warn('Book not found at index:', index);
+            return;
+        }
+
+        const book = globalBooksData[index];
+        console.log('Book clicked:', book.title || book);
+
+        if (typeof openBookDetailModal === 'function') {
+            openBookDetailModal(book);
+        } else {
+            console.warn('openBookDetailModal function not found');
+            alert(`Book: ${book.title}\nAuthor: ${book.author}\nISBN: ${book.isbn}`);
+        }
+    }
     // ========================================
     // HELPER FUNCTIONS
     // ========================================
@@ -861,32 +871,6 @@ document.addEventListener('DOMContentLoaded', function() {
         booksGridElement.removeEventListener('click', handleBookCardClick);
         booksGridElement.addEventListener('click', handleBookCardClick);
         console.log('Book click handler set up');
-    }
-
-    function handleBookCardClick(e) {
-        const card = e.target.closest('.book-card');
-        if (!card) return;
-
-        const index = parseInt(card.dataset.index);
-        if (isNaN(index)) {
-            console.warn('Invalid index on card');
-            return;
-        }
-
-        if (!globalBooksData || !globalBooksData[index]) {
-            console.warn('Book not found at index:', index);
-            return;
-        }
-
-        const book = globalBooksData[index];
-        console.log('Book clicked:', book.title || book);
-
-        if (typeof openBookDetailModal === 'function') {
-            openBookDetailModal(book);
-        } else {
-            console.warn('openBookDetailModal function not found');
-            alert(`Book: ${book.title}\nAuthor: ${book.author}\nISBN: ${book.isbn}`);
-        }
     }
 
     setupBookClickHandler();
@@ -1277,4 +1261,49 @@ function updateTopBorrowerDisplay(loansData) {
         }
         console.warn('No borrower data available');
     }
+}
+
+// SHOW TOAST NOTIFICATION
+// ========================================
+function showToast(message, type = 'info') {
+    let toast = document.getElementById('globalToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'globalToast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            z-index: 9999;
+            max-width: 400px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            transform: translateY(100px);
+            opacity: 0;
+            font-family: 'Inter', sans-serif;
+        `;
+        document.body.appendChild(toast);
+    }
+
+    const colors = {
+        success: { bg: '#def0e6', text: '#1a6e4a', icon: '' },
+        error: { bg: '#fce3df', text: '#b13a2e', icon: '' },
+        info: { bg: '#eaf0fa', text: '#1e2a4a', icon: '' }
+    };
+    const color = colors[type] || colors.info;
+
+    toast.style.background = color.bg;
+    toast.style.color = color.text;
+    toast.textContent = `${message}`;
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+        toast.style.transform = 'translateY(100px)';
+        toast.style.opacity = '0';
+    }, 4000);
 }
