@@ -19,6 +19,12 @@ public class SeatService {
         return seatRepository.fetchAllSeats();
     }
 
-    public Seat reserveSeat(Long seatId,Long  userId){ return seatRepository.reserveSeat(seatId, userId);}
+    public Seat reserveSeat(Long seatId,Long  userId){
+        int updated = seatRepository.reserveSeat(seatId, userId);
+        if (updated == 0) {
+            throw new RuntimeException("Seat not found or already reserved");
+        }
+        return seatRepository.findById(seatId).orElseThrow();
+    }
 
 }

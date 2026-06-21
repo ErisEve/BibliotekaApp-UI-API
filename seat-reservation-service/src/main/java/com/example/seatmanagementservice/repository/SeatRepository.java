@@ -1,6 +1,7 @@
 package com.example.seatmanagementservice.repository;
 
 import com.example.seatmanagementservice.model.Seat;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,10 +27,11 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> fetchAllSeats();
 
     @Modifying
+    @Transactional
     @Query(value = """
-            UPDATE seats SET reserved_by = :userId WHERE id = :seatId
+            UPDATE seats SET reserved_by = :userID WHERE id = :seatID
                         """, nativeQuery = true)
-    Seat reserveSeat(@Param("seatID") Long seatId,
-                     @Param("userID") Long userId);
+    int reserveSeat(@Param("userID") Long userID,
+                     @Param("seatID") Long seatID);
 
 }

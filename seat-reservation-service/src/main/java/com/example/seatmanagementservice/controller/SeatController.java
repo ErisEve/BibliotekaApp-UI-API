@@ -1,13 +1,19 @@
 package com.example.seatmanagementservice.controller;
 
+import com.example.seatmanagementservice.dto.SeatReservationDTO;
+import com.example.seatmanagementservice.feign_client.UserClient;
 import com.example.seatmanagementservice.model.Seat;
+import com.example.seatmanagementservice.model.User;
 import com.example.seatmanagementservice.service.SeatService;
+import com.netflix.discovery.converters.Auto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +33,8 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/seats")
 public class SeatController {
+    @Autowired
+    UserClient userClient;
 
     private final SeatService seatService;
 
@@ -46,27 +54,23 @@ public class SeatController {
         return seats;
     }
 
-    @PutMapping("/{seatId}/reserve")
+    @PutMapping("/reserve")
     public ResponseEntity<Map<String, Object>> reserveSeatByPath(
-            @PathVariable Long seatId,
-            @RequestParam Long userId) {
+            @Valid @RequestBody SeatReservationDTO request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = auth.getName();
+
+        User currentUser = userClient.findUserByEmail(currentEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Map<String, Object> response = new HashMap<>();
 
-        try {
-            Seat reservedSeat = seatService.reserveSeat(seatId, userId);
-
-            response.put("success", true);
-            response.put("message", "Seat " + reservedSeat.getSeat_number() + " reserved successfully");
-            response.put("seat", reservedSeat);
-
+        if (request.getEmail() != null && request.getSeatId() != null && request.getUserId() != null) {
+            seatService.reserveSeat(request.getSeatId(), request.getUserId());
+            response.put("message", "Seat updated successfully");
             return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Failed to reserve seat: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
         }
+        return ResponseEntity.ok(response);
     }
 }
 
