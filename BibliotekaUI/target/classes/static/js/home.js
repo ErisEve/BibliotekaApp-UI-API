@@ -1620,6 +1620,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const manualIsbn = document.getElementById('manualIsbn');
     const manualYear = document.getElementById('manualYear');
     const manualDescription = document.getElementById('manualDescription');
+    const manualCoverUrl = document.getElementById('manualCoverUrl');
 
     if (addBookManualForm) {
         addBookManualForm.addEventListener('submit', async function(e) {
@@ -1642,13 +1643,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 author: author,
                 isbn: manualIsbn ? manualIsbn.value.trim() || null : null,
                 publishedYear: manualYear ? (manualYear.value ? parseInt(manualYear.value) : null) : null,
-                description: manualDescription ? manualDescription.value.trim() || null : null
+                description: manualDescription ? manualDescription.value.trim() || null : null,
+                coverUrl: manualCoverUrl ? manualCoverUrl.value.trim() || null : null
             };
 
             const token = localStorage.getItem('jwtToken');
 
             try {
-                const response = await fetch('http://localhost:8080/api/books/add', {
+                const response = await fetch('http://localhost:8081/api/books/add', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1658,7 +1660,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to add book');
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Failed to add book');
                 }
 
                 if (manualToast) {
@@ -1666,6 +1669,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     manualToast.textContent = 'Book added successfully!';
                     manualToast.style.display = 'block';
                 }
+
+                // Reset form
+                manualTitle.value = '';
+                manualAuthor.value = '';
+                manualIsbn.value = '';
+                manualYear.value = '';
+                manualDescription.value = '';
+                if (manualCoverUrl) manualCoverUrl.value = '';
+
                 setTimeout(() => {
                     closeAddBookModal();
                     if (typeof fetchAllBooks === 'function') fetchAllBooks();
@@ -1679,5 +1691,51 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    }
+});
+
+// ---- TAB SWITCHING ----
+document.addEventListener('DOMContentLoaded', function() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    if (tabBtns.length > 0 && tabContents.length > 0) {
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+
+                // Remove active class from all tabs and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                const targetContent = document.getElementById(tabId);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+
+                // Reset ISBN form when switching away from it
+                if (tabId !== 'isbn-tab') {
+                    const isbnInput = document.getElementById('isbnInput');
+                    const isbnFetchResult = document.getElementById('isbnFetchResult');
+                    const isbnPreview = document.getElementById('isbnPreview');
+                    const saveIsbnBookBtn = document.getElementById('saveIsbnBookBtn');
+                    const isbnToast = document.getElementById('isbnToast');
+
+                    if (isbnInput) isbnInput.value = '';
+                    if (isbnFetchResult) isbnFetchResult.style.display = 'none';
+                    if (isbnPreview) isbnPreview.style.display = 'none';
+                    if (saveIsbnBookBtn) saveIsbnBookBtn.style.display = 'none';
+                    if (isbnToast) {
+                        isbnToast.className = 'toast-message';
+                        isbnToast.style.display = 'none';
+                    }
+                }
+            });
+        });
+        console.log('Tab switching initialized');
+    } else {
+        console.warn('⚠Tab buttons or contents not found');
     }
 });

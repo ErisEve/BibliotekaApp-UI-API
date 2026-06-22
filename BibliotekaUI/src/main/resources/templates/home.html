@@ -297,19 +297,19 @@
                 <!-- Preview of fetched book -->
                 <div id="isbnPreview" class="isbn-preview" style="display: none;">
                     <div class="preview-row">
-                        <span class="preview-label">Title:</span>
+                        <span class="preview-label">Naziv:</span>
                         <span id="previewTitle" class="preview-value">-</span>
                     </div>
                     <div class="preview-row">
-                        <span class="preview-label">Author:</span>
+                        <span class="preview-label">Autor:</span>
                         <span id="previewAuthor" class="preview-value">-</span>
                     </div>
                     <div class="preview-row">
-                        <span class="preview-label">Year:</span>
+                        <span class="preview-label">Godina:</span>
                         <span id="previewYear" class="preview-value">-</span>
                     </div>
                     <div class="preview-row">
-                        <span class="preview-label">Description:</span>
+                        <span class="preview-label">Opis:</span>
                         <span id="previewDescription" class="preview-value">-</span>
                     </div>
                 </div>
@@ -317,7 +317,7 @@
                 <div id="isbnToast" class="toast-message"></div>
 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelAddBookBtn">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="cancelAddBookBtn">Odustani</button>
                     <button type="button" class="btn btn-primary" id="fetchBookBtn">
                         <i class="fas fa-search"></i> Fetch Book
                     </button>
@@ -333,14 +333,14 @@
             <form id="addBookManualForm" class="add-book-form" novalidate>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="manualTitle"><i class="fas fa-heading"></i> Title *</label>
+                        <label for="manualTitle"><i class="fas fa-heading"></i> Naslov *</label>
                         <div class="input-wrapper">
                             <i class="fas fa-heading"></i>
                             <input type="text" id="manualTitle" placeholder="Enter book title" required />
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="manualAuthor"><i class="fas fa-user"></i> Author *</label>
+                        <label for="manualAuthor"><i class="fas fa-user"></i> Autor *</label>
                         <div class="input-wrapper">
                             <i class="fas fa-user"></i>
                             <input type="text" id="manualAuthor" placeholder="Enter author name" required />
@@ -357,7 +357,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="manualYear"><i class="fas fa-calendar"></i> Year</label>
+                        <label for="manualYear"><i class="fas fa-calendar"></i> Godina</label>
                         <div class="input-wrapper">
                             <i class="fas fa-calendar"></i>
                             <input type="number" id="manualYear" placeholder="e.g. 2005" min="1000" max="2100" />
@@ -366,19 +366,28 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="manualDescription"><i class="fas fa-align-left"></i> Description</label>
+                    <label for="manualDescription"><i class="fas fa-align-left"></i> Opis</label>
                     <div class="input-wrapper">
                         <i class="fas fa-align-left" style="align-self: flex-start; margin-top: 12px;"></i>
                         <textarea id="manualDescription" placeholder="Enter book description (optional)" rows="4"></textarea>
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label for="manualCoverUrl"><i class="fas fa-image"></i> Slika naslovnice URL</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-link"></i>
+                        <input type="url" id="manualCoverUrl" placeholder="https://example.com/book-cover.jpg" />
+                    </div>
+                    <div class="form-hint">Nalepi direktni link ka slici naslovnice.</div>
+                </div>
+
                 <div id="manualToast" class="toast-message"></div>
 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelManualBookBtn">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="cancelManualBookBtn">Odustani</button>
                     <button type="submit" class="btn btn-primary" id="saveManualBookBtn">
-                        <i class="fas fa-save"></i> Add Book
+                        <i class="fas fa-save"></i> Dodaj knjigu
                     </button>
                 </div>
             </form>

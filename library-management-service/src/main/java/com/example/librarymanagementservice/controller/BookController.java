@@ -5,10 +5,13 @@ import com.example.librarymanagementservice.service.BookService;
 import com.example.librarymanagementservice.service.ExternalBookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,4 +130,44 @@ public class BookController {
     public ResponseEntity<List<Map<String, Object>>> getTopActiveUsers() {
         return ResponseEntity.ok(bookService.getTopActiveUsers());
     }
+
+    @Operation(summary = "Add a new book manually",
+            description = "Adds a new book to the database with manually entered details. " +
+                    "Only librarians can add books.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book added successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Book.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid book data provided"),
+            @ApiResponse(responseCode = "403", description = "Access denied - Librarian role required"),
+            @ApiResponse(responseCode = "409", description = "Book with this ISBN already exists")
+    })
+    @PostMapping("/add")
+    public ResponseEntity<?> addBookManually(
+            @Parameter(description = "Book object to be added", required = true)
+            @Valid @RequestBody Book book, Principal principal) {
+
+        try {
+            // Set the fetchedBy field to the current librarian
+            book.setFetchedBy(principal.getName());
+
+            // Check if book with ISBN already exists
+//            if (book.getIsbn() != null && !book.getIsbn().isEmpty()) {
+//                if (bookService.existsByIsbn(book.getIsbn())) {
+//                    return ResponseEntity.status(HttpStatus.CONFLICT)
+//                            .body("Book with ISBN " + book.getIsbn() + " already exists");
+//                }
+//            }
+
+            Book saved = bookService.save(book);
+            return ResponseEntity.ok(saved);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid book data: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to add book: " + e.getMessage());
+        }
+    }
 }
+
