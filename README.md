@@ -19,3 +19,15 @@ Nista, samo otvorite sve u IntelliJ-u i proveravate da li se vezuju na Eureka se
 Sama aplikacija ce biti otvorena na gateway portu http://localhost:8080/ .
 
 ![eureka pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Pasted%20image%2020260622040136.png)
+
+## Funkcionalnosti aplikacije
+### Servisi koji postoje
+Ova aplikacija se sastoji od 5 odvojenih servisa:
+- *UI Service* - **port 8017** - koji sluzi da korisniku vizuelno pomogne kretanju kroz aplikaciju
+- *Library Management Service* - **port 8081** - koji se iskljucivo bavi samim knjigama u biblioteci (pregledanje, ubacivanje, brisanje knjiga)
+- *Loan Management Service* - **port 8083** - koji se bavi samo iznajmljivanjem (iznajmljivanje i vracanje knjiga)
+- *Seat Management Service* - **port 8084**  - preko kojeg mozete rezervisati sto u biblioteci za ucenje (rezervacija stola, ukidanje rezervacija..)
+- *User Service* - **port 8082** - koji se bavi korisnicima i autentifikacijom u sistemu.
+Swagger UI imaju svi servisi kojima je potrebno da ga imaju:
+![swagger pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Screenshot_58.png)
+### Pregled aplikacije
