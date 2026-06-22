@@ -1174,3 +1174,165 @@ body {
     transform: none;
 }
 
+/* ========================================
+   ADD BOOK MODAL
+   ======================================== */
+
+/* Tabs */
+.add-book-tabs {
+    display: flex;
+    gap: 4px;
+    background: #f0f4fe;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e2eaf5;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #5b6f8c;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: #1e2a4a;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #1e2a4a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tab-btn i {
+    font-size: 0.9rem;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ISBN Fetch Result */
+.fetch-result {
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.fetch-loading {
+    background: #eaf0fa;
+    color: #1e2a4a;
+}
+
+.fetch-success {
+    background: #def0e6;
+    color: #1a6e4a;
+}
+
+.fetch-error {
+    background: #fce3df;
+    color: #b13a2e;
+}
+
+/* ISBN Preview */
+.isbn-preview {
+    background: #f7faff;
+    border: 1px solid #e2eaf5;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.preview-row {
+    display: flex;
+    padding: 4px 0;
+    font-size: 0.9rem;
+}
+
+.preview-label {
+    font-weight: 600;
+    color: #4f6a8a;
+    min-width: 100px;
+}
+
+.preview-value {
+    color: #0b1a33;
+}
+
+/* Textarea in modal */
+.modal-card .input-wrapper textarea {
+    border: none;
+    background: transparent;
+    padding: 12px 0;
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+    color: #0b1a33;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.modal-card .input-wrapper textarea::placeholder {
+    color: #9aadc4;
+}
+
+.btn-success {
+    background: #1a6e4a;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #21835a;
+    transform: scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .add-book-tabs {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .preview-row {
+        flex-direction: column;
+        padding: 2px 0;
+    }
+
+    .preview-label {
+        min-width: auto;
+        font-size: 0.75rem;
+    }
+}

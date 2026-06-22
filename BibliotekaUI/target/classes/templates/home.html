@@ -38,7 +38,11 @@
                 <!-- context menu -->
                 <div class="context-menu" id="contextMenu" role="menu">
                     <button class="menu-item" id="editUserBtn">
-                        <i class="fas fa-user-edit"></i> Edit user info
+                        <i class="fas fa-user-edit"></i> Promeni podatke
+                    </button>
+                    <div class="menu-divider"></div>
+                    <button class="menu-item" id="addBookBtn" onclick="openAddBookModal();">
+                        <i class="fas fa-plus-circle"></i> Dodaj novu knjigu
                     </button>
                     <div class="menu-divider"></div>
                     <button class="menu-item danger" id="logoutBtn" role="menuitem">
@@ -240,6 +244,142 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancelLoanBtn" onclick="closeBookDetailModal()">Odustani</button>
                     <button type="submit" class="btn btn-primary" id="loanSubmitBtn">Pozajmi knjigu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========== ADD BOOK MODAL ========== -->
+<div class="modal-overlay" id="addBookModal" role="dialog" aria-modal="true">
+    <div class="modal-card modal-lg">
+        <div class="modal-header">
+            <h2><i class="fas fa-plus-circle"></i> Dodaj novu knjigu</h2>
+            <button class="modal-close" id="closeAddBookModal" aria-label="Close modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="add-book-tabs">
+            <button class="tab-btn active" data-tab="isbn-tab">
+                <i class="fas fa-barcode"></i> By ISBN
+            </button>
+            <button class="tab-btn" data-tab="manual-tab">
+                <i class="fas fa-pencil-alt"></i> Manuelno ubacivanje
+            </button>
+        </div>
+
+        <!-- ====== TAB 1: ISBN FORM ====== -->
+        <div id="isbn-tab" class="tab-content active">
+            <form id="addBookByIsbnForm" class="add-book-form" novalidate>
+                <div class="form-group">
+                    <label for="isbnInput"><i class="fas fa-barcode"></i> ISBN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" id="isbnInput" placeholder="Enter ISBN (e.g. 9780345391803)" required />
+                    </div>
+                    <div class="form-hint">Unesi ISBN 13 kod.</div>
+                </div>
+
+                <div id="isbnFetchResult" class="fetch-result" style="display: none;">
+                    <div class="fetch-loading"><i class="fas fa-spinner fa-spin"></i> Povlacenje podataka o knjizi...</div>
+                    <div class="fetch-success" style="display: none;">
+                        <i class="fas fa-check-circle" style="color: #1a6e4a;"></i>
+                        <span>Nadjena knjiga! Pogledajte u listi ispod..</span>
+                    </div>
+                    <div class="fetch-error" style="display: none;">
+                        <i class="fas fa-exclamation-circle" style="color: #b13a2e;"></i>
+                        <span id="isbnErrorText">Knjiga nije nadjena. Dodajte je kroz manuelno ubacivanje.</span>
+                    </div>
+                </div>
+
+                <!-- Preview of fetched book -->
+                <div id="isbnPreview" class="isbn-preview" style="display: none;">
+                    <div class="preview-row">
+                        <span class="preview-label">Title:</span>
+                        <span id="previewTitle" class="preview-value">-</span>
+                    </div>
+                    <div class="preview-row">
+                        <span class="preview-label">Author:</span>
+                        <span id="previewAuthor" class="preview-value">-</span>
+                    </div>
+                    <div class="preview-row">
+                        <span class="preview-label">Year:</span>
+                        <span id="previewYear" class="preview-value">-</span>
+                    </div>
+                    <div class="preview-row">
+                        <span class="preview-label">Description:</span>
+                        <span id="previewDescription" class="preview-value">-</span>
+                    </div>
+                </div>
+
+                <div id="isbnToast" class="toast-message"></div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAddBookBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="fetchBookBtn">
+                        <i class="fas fa-search"></i> Fetch Book
+                    </button>
+                    <button type="submit" class="btn btn-success" id="saveIsbnBookBtn" style="display: none;">
+                        <i class="fas fa-save"></i> Save Book
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ====== TAB 2: MANUAL FORM ====== -->
+        <div id="manual-tab" class="tab-content">
+            <form id="addBookManualForm" class="add-book-form" novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manualTitle"><i class="fas fa-heading"></i> Title *</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-heading"></i>
+                            <input type="text" id="manualTitle" placeholder="Enter book title" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualAuthor"><i class="fas fa-user"></i> Author *</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="manualAuthor" placeholder="Enter author name" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manualIsbn"><i class="fas fa-hashtag"></i> ISBN</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-hashtag"></i>
+                            <input type="text" id="manualIsbn" placeholder="Enter ISBN (optional)" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualYear"><i class="fas fa-calendar"></i> Year</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-calendar"></i>
+                            <input type="number" id="manualYear" placeholder="e.g. 2005" min="1000" max="2100" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="manualDescription"><i class="fas fa-align-left"></i> Description</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-align-left" style="align-self: flex-start; margin-top: 12px;"></i>
+                        <textarea id="manualDescription" placeholder="Enter book description (optional)" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div id="manualToast" class="toast-message"></div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelManualBookBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveManualBookBtn">
+                        <i class="fas fa-save"></i> Add Book
+                    </button>
                 </div>
             </form>
         </div>

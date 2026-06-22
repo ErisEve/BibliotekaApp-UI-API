@@ -24,7 +24,6 @@ import java.util.Map;
 @RestController
 @SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/books")
-@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8082", "http://localhost:8083"})
 public class BookController {
 
     private final BookService bookService;

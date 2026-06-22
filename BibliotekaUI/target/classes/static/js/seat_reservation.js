@@ -379,7 +379,6 @@ async function reserveSeat() {
 
         await fetchSeats();
 
-        // Clear selection
         selectedSeatId = null;
         const selectedSeatPreview = document.getElementById('selectedSeatPreview');
         const reserveBtn = document.getElementById('reserveBtn');

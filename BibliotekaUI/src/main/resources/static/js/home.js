@@ -72,7 +72,7 @@ function openBookDetailModal(book) {
     }
     localStorage.setItem('currentBookId', book.id);
 
-    // ✅ Remove old event listener to prevent duplicates
+    // Remove old event listener to prevent duplicates
     const loanForm = document.getElementById('loanForm');
     if (loanForm) {
         // Remove existing listener to avoid multiple submissions
@@ -93,10 +93,10 @@ function openBookDetailModal(book) {
 
     modal.classList.add('open');
 }
+
 // ========================================
 // LOAN BOOKS
 // ========================================
-
 function makeANewLoan(event) {
     event.preventDefault();
 
@@ -132,7 +132,7 @@ function makeANewLoan(event) {
         return;
     }
 
-    // ✅ Disable the submit button to prevent double submissions
+    // Disable the submit button to prevent double submissions
     const submitBtn = document.querySelector('#loanForm button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -159,13 +159,13 @@ function makeANewLoan(event) {
             return response.json();
         })
         .then(data => {
-            // ✅ Close modal immediately
+            // Close modal immediately
             closeBookDetailModal();
 
-            // ✅ Show success message
+            // Show success message
             showToast('Knjiga uspesno pozajmljena!', 'success');
 
-            // ✅ Refresh data after a short delay
+            // Refresh data after a short delay
             setTimeout(() => {
                 fetchAllBooks().then(() => fetchLoanedBooks());
             }, 500);
@@ -173,7 +173,7 @@ function makeANewLoan(event) {
         })
         .catch(error => {
             alert('Greska: ' + error.message);
-            // ✅ Re-enable the submit button on error
+            // Re-enable the submit button on error
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Loan Book';
@@ -773,7 +773,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // ✅ Store the data for click handler
+        // Store the data for click handler
         globalBooksData = booksData;
 
         let htmlEl = '';
@@ -828,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // ✅ Use the correct data source
+        // Use the correct data source
         if (!globalBooksData || !globalBooksData[index]) {
             console.warn('Book not found at index:', index);
             return;
@@ -1289,3 +1289,395 @@ function showToast(message, type = 'info') {
         toast.style.opacity = '0';
     }, 4000);
 }
+
+// ========================================
+// ADD BOOK MODAL
+// ========================================
+
+// ---- Open modal function (make it global) ----
+function openAddBookModal() {
+    console.log('📚 Opening Add Book Modal');
+    const modal = document.getElementById('addBookModal');
+    if (!modal) {
+        console.error('❌ Add Book Modal not found in DOM!');
+        alert('Modal not found! Please check your HTML.');
+        return;
+    }
+    modal.classList.add('open');
+
+    // Reset forms
+    const isbnInput = document.getElementById('isbnInput');
+    const isbnFetchResult = document.getElementById('isbnFetchResult');
+    const isbnPreview = document.getElementById('isbnPreview');
+    const saveIsbnBookBtn = document.getElementById('saveIsbnBookBtn');
+    const isbnToast = document.getElementById('isbnToast');
+
+    if (isbnInput) isbnInput.value = '';
+    if (isbnFetchResult) isbnFetchResult.style.display = 'none';
+    if (isbnPreview) isbnPreview.style.display = 'none';
+    if (saveIsbnBookBtn) saveIsbnBookBtn.style.display = 'none';
+    if (isbnToast) {
+        isbnToast.className = 'toast-message';
+        isbnToast.style.display = 'none';
+    }
+
+    // Reset manual form
+    const manualTitle = document.getElementById('manualTitle');
+    const manualAuthor = document.getElementById('manualAuthor');
+    const manualIsbn = document.getElementById('manualIsbn');
+    const manualYear = document.getElementById('manualYear');
+    const manualDescription = document.getElementById('manualDescription');
+    const manualToast = document.getElementById('manualToast');
+
+    if (manualTitle) manualTitle.value = '';
+    if (manualAuthor) manualAuthor.value = '';
+    if (manualIsbn) manualIsbn.value = '';
+    if (manualYear) manualYear.value = '';
+    if (manualDescription) manualDescription.value = '';
+    if (manualToast) {
+        manualToast.className = 'toast-message';
+        manualToast.style.display = 'none';
+    }
+
+    // Default to ISBN tab
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === 'isbn-tab');
+    });
+    tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === 'isbn-tab');
+    });
+}
+
+function closeAddBookModal() {
+    console.log('📚 Closing Add Book Modal');
+    const modal = document.getElementById('addBookModal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+
+// ---- Add the "Add New Book" button to context menu ----
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Setting up Add Book button in context menu');
+
+    const contextMenu = document.getElementById('contextMenu');
+    if (!contextMenu) {
+        console.error('❌ Context menu not found!');
+        return;
+    }
+
+    // Check if it already exists
+    if (document.getElementById('addBookBtn')) {
+        console.log('Add Book button already exists');
+        return;
+    }
+
+    // Find where to insert - after editUserBtn
+    const editUserBtn = document.getElementById('editUserBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (!editUserBtn || !logoutBtn) {
+        console.error('❌ Required buttons not found!');
+        return;
+    }
+
+    // Create the Add Book button
+    const addBookMenuItem = document.createElement('button');
+    addBookMenuItem.className = 'menu-item';
+    addBookMenuItem.id = 'addBookBtn';
+    addBookMenuItem.innerHTML = '<i class="fas fa-plus-circle"></i> Add New Book';
+    addBookMenuItem.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('🖱️ Add New Book clicked');
+        openAddBookModal();
+        // Close the context menu
+        const contextMenuEl = document.getElementById('contextMenu');
+        if (contextMenuEl) contextMenuEl.classList.remove('open');
+        const chevronIcon = document.getElementById('chevronIcon');
+        if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
+    });
+
+    // Insert before the logout button
+    contextMenu.insertBefore(addBookMenuItem, logoutBtn);
+
+    // Add divider before logout
+    const divider = document.createElement('div');
+    divider.className = 'menu-divider';
+    contextMenu.insertBefore(divider, logoutBtn);
+
+    console.log('✅ Add New Book button added to context menu');
+});
+
+// ---- Close modal buttons ----
+document.addEventListener('DOMContentLoaded', function() {
+    const closeAddBookBtn = document.getElementById('closeAddBookModal');
+    const cancelAddBookBtn = document.getElementById('cancelAddBookBtn');
+    const cancelManualBookBtn = document.getElementById('cancelManualBookBtn');
+    const addBookModal = document.getElementById('addBookModal');
+
+    if (closeAddBookBtn) {
+        closeAddBookBtn.addEventListener('click', closeAddBookModal);
+    }
+    if (cancelAddBookBtn) {
+        cancelAddBookBtn.addEventListener('click', closeAddBookModal);
+    }
+    if (cancelManualBookBtn) {
+        cancelManualBookBtn.addEventListener('click', closeAddBookModal);
+    }
+
+    // Close on backdrop click
+    if (addBookModal) {
+        addBookModal.addEventListener('click', function(e) {
+            if (e.target === addBookModal) {
+                closeAddBookModal();
+            }
+        });
+    }
+
+    // Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && addBookModal && addBookModal.classList.contains('open')) {
+            closeAddBookModal();
+        }
+    });
+});
+
+// ---- Fetch book by ISBN ----
+document.addEventListener('DOMContentLoaded', function() {
+    const fetchBookBtn = document.getElementById('fetchBookBtn');
+    const isbnInput = document.getElementById('isbnInput');
+    const isbnFetchResult = document.getElementById('isbnFetchResult');
+    const isbnPreview = document.getElementById('isbnPreview');
+    const saveIsbnBookBtn = document.getElementById('saveIsbnBookBtn');
+    const isbnToast = document.getElementById('isbnToast');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewAuthor = document.getElementById('previewAuthor');
+    const previewYear = document.getElementById('previewYear');
+    const previewDescription = document.getElementById('previewDescription');
+    const isbnErrorText = document.getElementById('isbnErrorText');
+
+    if (fetchBookBtn) {
+        fetchBookBtn.addEventListener('click', async function() {
+            const isbn = isbnInput ? isbnInput.value.trim() : '';
+
+            if (!isbn) {
+                if (isbnToast) {
+                    isbnToast.className = 'toast-message error';
+                    isbnToast.textContent = 'Please enter an ISBN.';
+                    isbnToast.style.display = 'block';
+                }
+                return;
+            }
+            fetchBookBtn.disabled = true;
+            fetchBookBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+            // Show loading
+            if (isbnFetchResult) {
+                isbnFetchResult.style.display = 'flex';
+                isbnFetchResult.className = 'fetch-result fetch-loading';
+                const loadingSpan = isbnFetchResult.querySelector('.fetch-loading span');
+                if (loadingSpan) loadingSpan.textContent = ' Ubacivanje... (moze da potraje 10-30 sekundi)';
+                const successDiv = isbnFetchResult.querySelector('.fetch-success');
+                const errorDiv = isbnFetchResult.querySelector('.fetch-error');
+                if (successDiv) successDiv.style.display = 'none';
+                if (errorDiv) errorDiv.style.display = 'none';
+            }
+            if (isbnPreview) isbnPreview.style.display = 'none';
+            if (saveIsbnBookBtn) saveIsbnBookBtn.style.display = 'none';
+
+            const token = localStorage.getItem('jwtToken');
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
+            console.log('Fetching book with ISBN:', isbn);
+            console.log('This may take 10-30 seconds...');
+            try {
+                const response = await fetch(`http://localhost:8081/api/books/fetch?isbn=${isbn}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                console.log('Response status:', response.status);
+
+                if (response.status === 403) {
+                    throw new Error('Moras biti bibliotekar da bi dodavao knjige.');
+                }
+
+                if (response.status === 401) {
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/login';
+                    throw new Error('Istekla je sesija. Molimo Vas da se ponovo ulogujete.');
+                }
+
+                if (!response.ok) {
+                    // Try to get error message from response
+                    let errorMessage = `Neuspesno povlacenje knjige sa isbn: ${isbn}`;
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) errorMessage = errorText;
+                    } catch (e) {}
+                    throw new Error(errorMessage);
+                }
+
+                const resultText = await response.text();
+                console.log('Book fetched and saved:', resultText);
+
+                if (isbnFetchResult) {
+                    isbnFetchResult.className = 'fetch-result fetch-success';
+                    const successDiv = isbnFetchResult.querySelector('.fetch-success');
+                    const errorDiv = isbnFetchResult.querySelector('.fetch-error');
+                    const successSpan = isbnFetchResult.querySelector('.fetch-success span');
+                    if (successSpan) successSpan.textContent = ' Knjiga uspesno sacuvana!';
+                    if (successDiv) successDiv.style.display = 'flex';
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }
+
+                // Show preview with info that book was saved
+                if (previewTitle) previewTitle.textContent = 'Knjiga uspesno sacuvana!';
+                if (previewAuthor) previewAuthor.textContent = 'ISBN: ' + isbn;
+                if (previewYear) previewYear.textContent = 'Pogledajte listu ispod.';
+                if (previewDescription) previewDescription.textContent = resultText;
+                if (isbnPreview) isbnPreview.style.display = 'block';
+
+                // Hide the save button since it's already saved
+                if (saveIsbnBookBtn) saveIsbnBookBtn.style.display = 'none';
+
+                setTimeout(() => {
+                    if (typeof fetchAllBooks === 'function') {
+                        fetchAllBooks();
+                    }
+                }, 500);
+
+                // Auto-close modal after 3 seconds
+                setTimeout(() => {
+                    if (typeof closeAddBookModal === 'function') {
+                        closeAddBookModal();
+                    }
+                }, 3000);
+
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.error('Fetch error:', error);
+
+                let errorMessage = error.message;
+
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Request je istekao. OpenLibrary API ucitava predugo. Molimo probajte ponovo.';
+                    if (isbnToast) {
+                        isbnToast.className = 'toast-message error';
+                        isbnToast.textContent = '⏰ ' + errorMessage;
+                        isbnToast.style.display = 'block';
+                    }
+                } else if (error.message.includes('403')) {
+                    errorMessage = 'Moras da budes bibliotekar.';
+                    if (isbnToast) {
+                        isbnToast.className = 'toast-message error';
+                        isbnToast.textContent = errorMessage;
+                        isbnToast.style.display = 'block';
+                    }
+                }
+            }
+        });
+    }
+});
+
+// ---- Save book from ISBN ---
+document.addEventListener('DOMContentLoaded', function() {
+    const addBookByIsbnForm = document.getElementById('addBookByIsbnForm');
+    const isbnToast = document.getElementById('isbnToast');
+
+    if (addBookByIsbnForm) {
+        addBookByIsbnForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Show message that book is already saved via fetch
+            if (isbnToast) {
+                isbnToast.className = 'toast-message info';
+                isbnToast.textContent = 'Book was already saved when fetched!';
+                isbnToast.style.display = 'block';
+            }
+
+            // Just close the modal
+            setTimeout(() => {
+                closeAddBookModal();
+                if (typeof fetchAllBooks === 'function') fetchAllBooks();
+            }, 1500);
+        });
+    }
+});
+// ---- Save manual book ----
+document.addEventListener('DOMContentLoaded', function() {
+    const addBookManualForm = document.getElementById('addBookManualForm');
+    const manualToast = document.getElementById('manualToast');
+    const manualTitle = document.getElementById('manualTitle');
+    const manualAuthor = document.getElementById('manualAuthor');
+    const manualIsbn = document.getElementById('manualIsbn');
+    const manualYear = document.getElementById('manualYear');
+    const manualDescription = document.getElementById('manualDescription');
+
+    if (addBookManualForm) {
+        addBookManualForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const title = manualTitle ? manualTitle.value.trim() : '';
+            const author = manualAuthor ? manualAuthor.value.trim() : '';
+
+            if (!title || !author) {
+                if (manualToast) {
+                    manualToast.className = 'toast-message error';
+                    manualToast.textContent = 'Title and Author are required.';
+                    manualToast.style.display = 'block';
+                }
+                return;
+            }
+
+            const bookData = {
+                title: title,
+                author: author,
+                isbn: manualIsbn ? manualIsbn.value.trim() || null : null,
+                publishedYear: manualYear ? (manualYear.value ? parseInt(manualYear.value) : null) : null,
+                description: manualDescription ? manualDescription.value.trim() || null : null
+            };
+
+            const token = localStorage.getItem('jwtToken');
+
+            try {
+                const response = await fetch('http://localhost:8080/api/books/add', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add book');
+                }
+
+                if (manualToast) {
+                    manualToast.className = 'toast-message success';
+                    manualToast.textContent = 'Book added successfully!';
+                    manualToast.style.display = 'block';
+                }
+                setTimeout(() => {
+                    closeAddBookModal();
+                    if (typeof fetchAllBooks === 'function') fetchAllBooks();
+                }, 1500);
+
+            } catch (error) {
+                if (manualToast) {
+                    manualToast.className = 'toast-message error';
+                    manualToast.textContent = 'Error: ' + error.message;
+                    manualToast.style.display = 'block';
+                }
+            }
+        });
+    }
+});

@@ -75,7 +75,7 @@ public class SecurityConfig {
                         // Allow both USER and ADMIN to access /api/books
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyRole("LIBRARIAN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/books/**").hasAnyRole("LIBRARIAN", "USER")
-
+                        .requestMatchers("/api/books/fetch").hasAuthority("ROLE_LIBRARIAN")
 
                         // Only ADMIN can delete books
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("LIBRARIAN")
