@@ -64,9 +64,10 @@ public class SeatController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Map<String, Object> response = new HashMap<>();
-
+        System.out.println("Im in the controller. request: "+request.toString());
         if (request.getEmail() != null && request.getSeatId() != null && request.getUserId() != null) {
-            seatService.reserveSeat(request.getSeatId(), request.getUserId());
+            Seat s = seatService.reserveSeat(request.getSeatId(), request.getUserId());
+            System.out.println("I put it together: "+s) ;
             response.put("message", "Seat updated successfully");
             return ResponseEntity.ok(response);
         }

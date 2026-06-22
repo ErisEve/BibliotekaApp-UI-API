@@ -16,10 +16,18 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "seat_number", nullable = false, unique = true)
     private String seat_number;
 
     @OneToOne
-    User user;
+    @JoinColumn(name = "reserved_by", referencedColumnName = "id")
+    private User user;
 
+    public Long getReservedBy() {
+        return user != null ? user.getId() : null;
+    }
+
+    public String getSeatNumber() {
+        return seat_number;
+    }
 }

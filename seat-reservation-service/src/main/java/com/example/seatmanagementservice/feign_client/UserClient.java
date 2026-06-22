@@ -12,7 +12,7 @@ import java.util.Optional;
 //@FeignClient(name = "user-service", url = "${user.service.url}")
 @FeignClient(name = "gateway-service")
 public interface UserClient {
-    @GetMapping("/users/{id}")
+    @GetMapping("api/users/{id}")
     User getUser(@PathVariable Long id);
 
     @GetMapping("api/users/findByEmail/{email}")

@@ -1,6 +1,8 @@
 package com.example.seatmanagementservice.service;
 
+import com.example.seatmanagementservice.feign_client.UserClient;
 import com.example.seatmanagementservice.model.Seat;
+import com.example.seatmanagementservice.model.User;
 import com.example.seatmanagementservice.repository.SeatRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +12,11 @@ import java.util.List;
 public class SeatService {
 
     private final SeatRepository seatRepository;
+    private final UserClient userClient;
 
-    public SeatService(SeatRepository seatRepository) {
+    public SeatService(SeatRepository seatRepository, UserClient userClient) {
         this.seatRepository = seatRepository;
+        this.userClient = userClient;
     }
 
     public List<Seat> findAll() {
@@ -20,11 +24,14 @@ public class SeatService {
     }
 
     public Seat reserveSeat(Long seatId,Long  userId){
-        int updated = seatRepository.reserveSeat(seatId, userId);
-        if (updated == 0) {
-            throw new RuntimeException("Seat not found or already reserved");
+        User user = userClient.getUser(userId);
+        Seat seat = seatRepository.getById(seatId);
+        if (seat.getUser() != null) {
+            throw new IllegalStateException("Seat " + seat.getSeatNumber() + " is already reserved");
         }
-        return seatRepository.findById(seatId).orElseThrow();
+        System.out.println("What do we have here: " + seat.toString());
+        seat.setUser(user);
+        return seatRepository.save(seat);
     }
 
 }

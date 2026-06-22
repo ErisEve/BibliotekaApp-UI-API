@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set user name
     const userNameDisplay = document.getElementById('userNameDisplay');
     if (userNameDisplay) {
-        userNameDisplay.textContent = localStorage.getItem('userEmail') || 'User';
+        userNameDisplay.textContent = (localStorage.getItem('userEmail') || 'User').split('@')[0];
     }
 
     const loanGridElement = document.getElementById('lendeditems');

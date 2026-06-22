@@ -738,3 +738,306 @@ body {
         font-size: 0.8rem;
     }
 }
+/* ========================================
+   MODAL OVERLAY & FORM
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s;
+    padding: 1.5rem;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s 0s;
+}
+
+.modal-card {
+    background: #ffffff;
+    border-radius: 32px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 32px 72px rgba(0, 0, 0, 0.20);
+    padding: 2rem 2rem 2.2rem;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-overlay.open .modal-card {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.8rem;
+}
+
+.modal-header h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #0b1a33;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h2 i {
+    color: #2b4b7a;
+}
+
+.modal-close {
+    background: #f0f4fe;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 40px;
+    font-size: 1.2rem;
+    color: #3f5a7a;
+    cursor: pointer;
+    transition: 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: #e2eaf5;
+    color: #1e2a4a;
+}
+
+/* Form Groups */
+.modal-card .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-card .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1e2a4a;
+    margin-bottom: 5px;
+}
+
+.modal-card .form-group label i {
+    color: #4f6a8a;
+    margin-right: 4px;
+}
+
+.modal-card .input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f7faff;
+    border: 1.5px solid #e2eaf5;
+    border-radius: 14px;
+    padding: 4px 16px 4px 14px;
+    transition: 0.15s;
+}
+
+.modal-card .input-wrapper:focus-within {
+    border-color: #1e2a4a;
+    box-shadow: 0 0 0 3px rgba(30, 42, 74, 0.06);
+}
+
+.modal-card .input-wrapper i {
+    color: #7b8da8;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+.modal-card .input-wrapper input {
+    border: none;
+    background: transparent;
+    padding: 12px 0;
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+    color: #0b1a33;
+}
+
+.modal-card .input-wrapper input::placeholder {
+    color: #9aadc4;
+}
+
+.modal-card .form-hint {
+    font-size: 0.75rem;
+    color: #6f829f;
+    margin-top: 6px;
+    padding-left: 4px;
+}
+
+/* Toast Message */
+.modal-card .toast-message {
+    margin-top: 1rem;
+    padding: 10px 16px;
+    border-radius: 60px;
+    background: #def0e6;
+    color: #1a6e4a;
+    font-size: 0.85rem;
+    text-align: center;
+    display: none;
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 1.8rem;
+    justify-content: flex-end;
+}
+
+.modal-actions .btn {
+    padding: 11px 28px;
+    border-radius: 60px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: 0.12s;
+}
+
+.modal-actions .btn-primary {
+    background: #1e2a4a;
+    color: white;
+}
+
+.modal-actions .btn-primary:hover {
+    background: #2b3a60;
+    transform: scale(1.02);
+}
+
+.modal-actions .btn-secondary {
+    background: #f0f4fe;
+    color: #1e2a4a;
+}
+
+.modal-actions .btn-secondary:hover {
+    background: #e2eaf5;
+}
+
+/* Scrollbar styling for modal */
+.modal-card::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modal-card::-webkit-scrollbar-track {
+    background: #f0f4fe;
+    border-radius: 10px;
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+    background: #c8d8ea;
+    border-radius: 10px;
+}
+
+.modal-card::-webkit-scrollbar-thumb:hover {
+    background: #a8b8ca;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .modal-card {
+        padding: 1.5rem;
+        max-width: 100%;
+        margin: 1rem;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .modal-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ========================================
+   CONTEXT MENU
+   ======================================== */
+
+.context-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+    min-width: 210px;
+    padding: 8px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s 0.18s;
+    border: 1px solid #eef4fa;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.context-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s 0s;
+    pointer-events: auto;
+}
+
+.context-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    color: #1e2a4a;
+    cursor: pointer;
+    transition: background 0.08s;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-family: inherit;
+    text-align: left;
+}
+
+.context-menu .menu-item i {
+    width: 18px;
+    font-size: 1rem;
+    color: #4f6a8a;
+}
+
+.context-menu .menu-item:hover {
+    background: #f0f6ff;
+}
+
+.context-menu .menu-divider {
+    height: 1px;
+    background: #eef4fa;
+    margin: 6px 12px;
+}
+
+.context-menu .menu-item.danger {
+    color: #b13a2e;
+}
+
+.context-menu .menu-item.danger i {
+    color: #b13a2e;
+}
+
+.context-menu .menu-item.danger:hover {
+    background: #fcf0ed;
+}

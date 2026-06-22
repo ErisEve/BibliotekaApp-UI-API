@@ -40,7 +40,9 @@ public class UserService {
     public Optional<User> findByEmail(String email){
         return userRepository.findByEmail(email);
     }
-
+    public Optional<User> findById(Long id){
+        return userRepository.findById(id);
+    }
     // Password check helper
     public boolean checkPassword(User user, String rawPassword) {
         return passwordEncoder.matches(rawPassword, user.getPassword());

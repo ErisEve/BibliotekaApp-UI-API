@@ -29,11 +29,22 @@
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
-            <div class="user-profile">
-                <div class="avatar">JD</div>
-                <span></span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </div>
+<!--            user profile clickable-->
+            <div class="user-profile" id="userProfile" role="button" tabindex="0" aria-haspopup="true">
+                <div class="avatar">L</div>
+                <span id="userNameDisplay"></span>
+                <i class="fas fa-chevron-down chevron" id="chevronIcon"></i>
+
+                <!-- context menu -->
+                <div class="context-menu" id="contextMenu" role="menu">
+                    <button class="menu-item" id="editUserBtn">
+                        <i class="fas fa-user-edit"></i> Edit user info
+                    </button>
+                    <div class="menu-divider"></div>
+                    <button class="menu-item danger" id="logoutBtn" role="menuitem">
+                        <i class="fas fa-sign-out-alt"></i> Odjavi se
+                    </button>
+                </div>
         </div>
     </header>
 
@@ -114,10 +125,51 @@
                 <i class="fas fa-circle" style="color: #4299e1; font-size: 0.5rem; vertical-align: middle; margin-left: 12px;"></i>
                 Selektovano
             </span>
-        <span class="badge">
-                <i class="fas fa-sync-alt fa-fw"></i> Auto-refresh: 30s
-            </span>
     </div>
+</div>
+<!-- ========== MODAL (edit user info) ========== -->
+<div class="modal-overlay" id="editModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-cog"></i> Izmeni profil</h2>
+            <button class="modal-close" id="closeModalBtn" aria-label="Close modal"><i class="fas fa-times"></i></button>
+        </div>
+
+        <form id="editForm" novalidate>
+            <div class="form-group">
+                <label for="emailInput"><i class="fas fa-envelope" style="margin-right: 6px; color: #4f6a8a;"></i> Email address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="emailInput" placeholder="librarian@library.org" />
+                </div>
+                <div class="form-hint">Unesi novu email adresu.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="passwordInput"><i class="fas fa-lock" style="margin-right: 6px; color: #4f6a8a;"></i> Nova sifra</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="passwordInput" placeholder="••••••••" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPasswordInput"><i class="fas fa-check-circle" style="margin-right: 6px; color: #4f6a8a;"></i> Potvrdi sifru</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-check-circle"></i>
+                    <input type="password" id="confirmPasswordInput" placeholder="••••••••" />
+                </div>
+            </div>
+
+            <div id="formToast" class="toast-message">Changes saved successfully!</div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelModalBtn">Odustani</button>
+                <button type="submit" class="btn btn-primary" id="submitUserChanges">Sacuvaj promene</button>
+            </div>
+        </form>
+    </div>
+</div>
 </div>
 <script th:src="@{/js/seat_reservation.js}" defer></script>
 </body>

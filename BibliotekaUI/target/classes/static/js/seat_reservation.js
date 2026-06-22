@@ -3,7 +3,7 @@ const API_BASE_URL = "http://localhost:8080/api/seats";
 let seatsData = [];
 let globalSeatsData = [];
 let selectedSeatId = null;
-let userId = 1;
+let userId = localStorage.getItem('userId');
 
 // Helper function to escape HTML
 function escapeHtml(text) {
@@ -329,7 +329,10 @@ async function reserveSeat() {
     }
 
     const seat = seatsData.find(s => s.id === selectedSeatId);
-    if (!seat) return;
+    if (!seat) {
+        showToast('Seat not found!', 'error');
+        return;
+    }
 
     if (seat.status === 'occupied') {
         showToast(`Seat ${seat.seatNumber} is no longer available.`, 'error');
@@ -340,6 +343,14 @@ async function reserveSeat() {
 
     const token = localStorage.getItem('jwtToken');
 
+    // const userId = localStorage.getItem('userId') || 1; // Fallback, but should be set during login
+    const email = localStorage.getItem('userEmail');
+    console.log('Reserving seat:', {
+        seatId: selectedSeatId,
+        userId: userId,
+        email: email
+    });
+
     try {
         const response = await fetch(`${API_BASE_URL}/reserve`, {
             method: 'PUT',
@@ -348,9 +359,13 @@ async function reserveSeat() {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                userId: userId
+                seatId: selectedSeatId,
+                userId: userId,
+                email:email
             })
         });
+
+        console.log('Reserve response status:', response.status);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -358,21 +373,16 @@ async function reserveSeat() {
         }
 
         const result = await response.json();
+        console.log('Reserve result:', result);
+
         showToast(`Seat ${seat.seatNumber} reserved successfully!`, 'success');
 
-        seat.status = 'occupied';
-        seat.reservedBy = localStorage.getItem('userEmail') || 'current_user';
-        seat.user = { email: localStorage.getItem('userEmail') || 'current_user' };
+        await fetchSeats();
+
+        // Clear selection
         selectedSeatId = null;
-
-        renderSeats(seatsData);
-        updateStats(seatsData);
-
-        const selectedSeatDisplay = document.getElementById('selectedSeatDisplay');
         const selectedSeatPreview = document.getElementById('selectedSeatPreview');
         const reserveBtn = document.getElementById('reserveBtn');
-
-        if (selectedSeatDisplay) selectedSeatDisplay.textContent = 'None';
         if (selectedSeatPreview) selectedSeatPreview.style.display = 'none';
         if (reserveBtn) reserveBtn.disabled = true;
 
@@ -381,7 +391,6 @@ async function reserveSeat() {
         showToast(`Failed to reserve seat: ${error.message}`, 'error');
     }
 }
-
 // Refresh seats
 async function refreshSeats() {
     showToast('Refreshing seat data...', 'info');
@@ -431,9 +440,8 @@ async function init() {
     // Continue with initialization
     const userNameDisplay = document.getElementById('userNameDisplay');
     if (userNameDisplay) {
-        userNameDisplay.textContent = (email || 'user').split('@')[0];
+        userNameDisplay.textContent = (localStorage.getItem('userEmail') || 'User').split('@')[0];
     }
-
 
     await fetchSeats();
 
@@ -453,3 +461,266 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ========================================
+// USER PROFILE CONTEXT MENU
+// ========================================
+(function() {
+    const userProfile = document.getElementById('userProfile');
+    const contextMenu = document.getElementById('contextMenu');
+    const chevronIcon = document.getElementById('chevronIcon');
+    let isMenuOpen = false;
+
+    if (userProfile) {
+        userProfile.addEventListener('click', toggleMenu);
+    }
+
+    function toggleMenu(e) {
+        e.stopPropagation();
+        isMenuOpen = !isMenuOpen;
+        if (contextMenu) {
+            contextMenu.classList.toggle('open', isMenuOpen);
+        }
+        if (chevronIcon) {
+            chevronIcon.style.transform = isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (isMenuOpen && userProfile && !userProfile.contains(e.target)) {
+            if (contextMenu) contextMenu.classList.remove('open');
+            isMenuOpen = false;
+            if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isMenuOpen) {
+            if (contextMenu) contextMenu.classList.remove('open');
+            isMenuOpen = false;
+            if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
+            if (userProfile) userProfile.focus();
+        }
+    });
+
+    // ---- EDIT MODAL ----
+    const modalOverlay = document.getElementById('editModal');
+    const openModalBtn = document.getElementById('editUserBtn');
+    const submitChangesBtn = document.getElementById('submitUserChanges');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+    const editForm = document.getElementById('editForm');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const confirmInput = document.getElementById('confirmPasswordInput');
+    const toast = document.getElementById('formToast');
+
+    if (openModalBtn && modalOverlay) {
+        openModalBtn.addEventListener('click', openModal);
+    }
+
+    function openModal() {
+        if (modalOverlay) modalOverlay.classList.add('open');
+        if (toast) {
+            toast.style.display = 'none';
+            toast.textContent = 'Changes saved successfully!';
+        }
+        if (isMenuOpen && contextMenu) {
+            contextMenu.classList.remove('open');
+            isMenuOpen = false;
+            if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
+        }
+
+        // Pre-fill current email if available
+        if (emailInput) {
+            const currentEmail = localStorage.getItem('userEmail');
+            if (currentEmail) {
+                emailInput.value = currentEmail;
+            }
+        }
+        // Clear password fields
+        if (passwordInput) passwordInput.value = '';
+        if (confirmInput) confirmInput.value = '';
+    }
+
+    if (closeModalBtn && modalOverlay) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    if (cancelModalBtn && modalOverlay) {
+        cancelModalBtn.addEventListener('click', closeModal);
+    }
+
+    function closeModal() {
+        if (modalOverlay) modalOverlay.classList.remove('open');
+        if (editForm) {
+            const wrappers = editForm.querySelectorAll('.input-wrapper');
+            wrappers.forEach(el => el.style.borderColor = '');
+        }
+    }
+
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('open')) {
+            closeModal();
+        }
+    });
+
+    // ---- API CALL TO UPDATE USER ----
+    async function updateUserApi(userData) {
+        const token = localStorage.getItem('jwtToken');
+
+        if (!token) {
+            throw new Error('User not authenticated. Please login again.');
+        }
+
+        try {
+            const response = await fetch('http://localhost:8080/api/users/update', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 401) {
+                    throw new Error('Session expired. Please login again.');
+                } else if (response.status === 409) {
+                    throw new Error('Email already in use by another account.');
+                } else {
+                    throw new Error(errorData.message || 'Failed to update profile.');
+                }
+            }
+
+            const data = await response.json();
+
+            // Update stored token if it was refreshed
+            if (data.newToken) {
+                localStorage.setItem('jwtToken', data.newToken);
+            }
+
+            // Update stored email if changed
+            if (userData.email) {
+                localStorage.setItem('userEmail', userData.email);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Update error:', error);
+            throw error;
+        }
+    }
+
+    // ---- EDIT FORM SUBMIT ----
+    if (editForm) {
+        editForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            let hasError = false;
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value : '';
+            const confirm = confirmInput ? confirmInput.value : '';
+
+            if (editForm) {
+                const wrappers = editForm.querySelectorAll('.input-wrapper');
+                wrappers.forEach(el => el.style.borderColor = '');
+            }
+
+            if (!email || !email.includes('@')) {
+                if (emailInput && emailInput.closest) {
+                    emailInput.closest('.input-wrapper').style.borderColor = '#b13a2e';
+                }
+                hasError = true;
+            }
+
+            if (password.length > 0) {
+                if (password.length < 6) {
+                    if (passwordInput && passwordInput.closest) {
+                        passwordInput.closest('.input-wrapper').style.borderColor = '#b13a2e';
+                    }
+                    hasError = true;
+                }
+                if (password !== confirm) {
+                    if (confirmInput && confirmInput.closest) {
+                        confirmInput.closest('.input-wrapper').style.borderColor = '#b13a2e';
+                    }
+                    hasError = true;
+                }
+            }
+
+            if (toast) {
+                if (hasError) {
+                    toast.style.display = 'block';
+                    toast.style.background = '#fce3df';
+                    toast.style.color = '#b13a2e';
+                    toast.textContent = 'Lose uneseni podaci.';
+                    return;
+                }
+
+                // Show loading state
+                toast.style.display = 'block';
+                toast.style.background = '#4299e1';
+                toast.style.color = 'white';
+                toast.textContent = 'Azuriranje...';
+            }
+
+            try {
+                // Prepare data for API
+                const updateData = {
+                    email: email
+                };
+
+                if (password && password.length >= 6) {
+                    updateData.password = password;
+                }
+
+                // Call API
+                const result = await updateUserApi(updateData);
+                console.log(result);
+
+                // Success
+                if (toast) {
+                    toast.style.background = '#def0e6';
+                    toast.style.color = '#1a6e4a';
+                    toast.textContent = 'Profile updated successfully!';
+                }
+
+                // Close modal after success
+
+            } catch (error) {
+                // Error
+                if (toast) {
+                    toast.style.background = '#fce3df';
+                    toast.style.color = '#b13a2e';
+                    toast.textContent = `Error: ${error.message}`;
+                }
+                console.error('Update error:', error);
+            }
+        });
+    }
+
+    // ---- LOGOUT ----
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('userEmail');
+                window.location.href = '/login';
+            }
+            if (contextMenu) contextMenu.classList.remove('open');
+            isMenuOpen = false;
+            if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
+        });
+    }
+})();

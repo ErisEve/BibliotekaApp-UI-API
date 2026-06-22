@@ -57,6 +57,13 @@ public class UserController {
         return userService.findByEmail(email);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = userService.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+        return ResponseEntity.ok(user);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<Map<String, Object>> updateUser(@Valid @RequestBody UpdateUserRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
