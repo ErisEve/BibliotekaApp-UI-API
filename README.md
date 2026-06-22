@@ -17,4 +17,5 @@ Nejasno je da li su verzije springboota i jdk u svim ovim servisima iste (autork
 ### 3. Pokrenuti sve ostale servise na apsolutno isti nacin
 Nista, samo otvorite sve u IntelliJ-u i proveravate da li se vezuju na Eureka server, koji radi na portu/linku http://localhost:8761/ .
 Sama aplikacija ce biti otvorena na gateway portu http://localhost:8080/ .
-[!eureka pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Pasted%20image%2020260622040136.png)
+
+![eureka pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Pasted%20image%2020260622040136.png)
