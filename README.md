@@ -35,22 +35,12 @@ Swagger UI imaju svi servisi kojima je potrebno da ga imaju:
 ### Pregled aplikacije
 Kada otvorite link localhost:8080, ukoliko ste sve pokrenuli kako treba, na njemu treba da se nadje ovo:
 ![login pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Screenshot_58.png)
-**BITNO:**
-Za logovanje u aplikaciju, nije moguce koristiti svakog usera iz baze podataka.[^1] Ovo ce biti doterano u toku dana.[^2]
 
-Za logovanje u ulogu korisnika, koristiti ovaj email i sifru:
-- lala@example.com
-- Abcd123
+Za logovanje u aplikaciju, moguce je koristiti bilo kog usera iz baze podataka.
 
-Za logovanje u ulogu bibliotekara, koristiti ovaj email i sifru:
-- aaa@library.com
-- 123
+Svaka sifra je hesovana, i svakom korisnickom profilu se moze kroz logovanje pristupiti sa sifrom "123".
 
 Kada se uspesno ulogujete u sistem, videcete ovo:
 ![app pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Screenshot_59.png)
 (specificno, ovo je pogled bibliotekara)
 
-
-
-[^1]: Ukratko, kad sam ubacivala podatke na pocetku, zaboravila sam da se hesiraju prilikom autentifikacije. Stoga se trenutno u bazi nalazi gomilu nekih korisnika sa siframa kojima je nemoguce pristupiti zato sto nisu hesovane. 
-[^2]: Azuriracu library-db-mkfile.sql u toku dana tako da svi korisnici imaju upotrebljive sifre i emailove, i da se iz svakog moze pristupiti aplikaciji. Ne mogu sad odma jer je 5 ujutru.
