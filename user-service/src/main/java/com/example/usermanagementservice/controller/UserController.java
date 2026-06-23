@@ -1,6 +1,5 @@
 package com.example.usermanagementservice.controller;
 
-import com.example.usermanagementservice.config.FeignConfig;
 import com.example.usermanagementservice.dto.UpdateUserRequest;
 import com.example.usermanagementservice.dto.UserActivityDTO;
 import com.example.usermanagementservice.model.User;
@@ -9,12 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

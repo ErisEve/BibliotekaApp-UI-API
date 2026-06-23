@@ -35,12 +35,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
         System.out.println("========================================");
-        System.out.println("🔍 JWT Filter Processing: " + path);
+        System.out.println("JWT Filter Processing: " + path);
         System.out.println("Method: " + request.getMethod());
 
         // Skip JWT validation for public endpoints
         if (path.startsWith("/api/auth")) {
-            System.out.println("⏭️ Skipping auth for public endpoint: " + path);
+            System.out.println("Skipping auth for public endpoint: " + path);
             filterChain.doFilter(request, response);
             return;
         }
@@ -61,13 +61,13 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 // get username (subject) from token
                 username = jwtUtil.extractUsername(jwtToken);
-                System.out.println("✅ Username extracted: " + username);
+                System.out.println("Username extracted: " + username);
             } catch (Exception e) {
-                System.err.println("❌ Invalid JWT Token: " + e.getMessage());
+                System.err.println("Invalid JWT Token: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
-            System.out.println("⚠️ No valid Authorization header found");
+            System.out.println("No valid Authorization header found");
             // For testing, continue without authentication
             filterChain.doFilter(request, response);
             return;
@@ -75,16 +75,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // If token is valid and user is not yet authenticated - Loads user from DB using username
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            System.out.println("🔍 Loading user details for: " + username);
+            System.out.println("Loading user details for: " + username);
 
             try {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                System.out.println("✅ User details loaded: " + userDetails.getUsername());
+                System.out.println("User details loaded: " + userDetails.getUsername());
                 System.out.println("User authorities: " + userDetails.getAuthorities());
 
                 // Validates the JWT against that user
                 if(jwtUtil.validateToken(jwtToken, userDetails)) {
-                    System.out.println("✅ JWT validated for user: " + username);
+                    System.out.println("JWT validated for user: " + username);
 
                     // Extract roles from token and convert them to GrantedAuthority
                     List<String> roles = jwtUtil.extractRoles(jwtToken);
@@ -104,21 +104,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     // Stores it in the security context, marking the user as authenticated
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("✅ Authentication set in SecurityContext");
+                    System.out.println("Authentication set in SecurityContext");
                 } else {
-                    System.err.println("❌ JWT validation failed for user: " + username);
+                    System.err.println("JWT validation failed for user: " + username);
                 }
             } catch (Exception e) {
-                System.err.println("❌ Error loading user or validating token: " + e.getMessage());
+                System.err.println("Error loading user or validating token: " + e.getMessage());
                 e.printStackTrace();
                 // Don't set authentication
             }
         } else {
             if (username == null) {
-                System.out.println("⚠️ Username is null - token extraction failed");
+                System.out.println("Username is null - token extraction failed");
             }
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
-                System.out.println("ℹ️ Authentication already exists in context");
+                System.out.println("Authentication already exists in context");
             }
         }
 

@@ -7,8 +7,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-//@FeignClient(name = "user-service", url = "http://localhost:8081")
-//@FeignClient(name = "user-service", url = "${user.service.url}")
 @FeignClient(
         name = "gateway-service",
         url = "http://localhost:8080",

@@ -85,7 +85,7 @@ public class BookController {
         return bookService.save(book);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteBook(@PathVariable Long id) {
         if (bookService.existsById(id)) {
