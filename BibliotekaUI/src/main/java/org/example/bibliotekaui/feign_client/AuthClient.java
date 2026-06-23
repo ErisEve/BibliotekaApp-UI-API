@@ -19,3 +19,4 @@ public interface AuthClient {
     @PostMapping("/api/auth/register")
     AuthResponse register(@RequestBody AuthRequest authRequest);
 }
+
