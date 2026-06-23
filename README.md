@@ -34,7 +34,7 @@ Swagger UI imaju svi servisi kojima je potrebno da ga imaju:
 ![swagger pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Screenshot_58.png)
 ### Pregled aplikacije
 Kada otvorite link localhost:8080, ukoliko ste sve pokrenuli kako treba, na njemu treba da se nadje ovo:
-![login pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Screenshot_58.png)
+![login pic](https://github.com/ErisEve/BibliotekaApp-UI-API/blob/main/Screenshot_60.png)
 
 Za logovanje u aplikaciju, moguce je koristiti bilo kog usera iz baze podataka.
 
