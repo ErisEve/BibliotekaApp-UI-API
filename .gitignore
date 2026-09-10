@@ -17,3 +17,6 @@ Thumbs.db
 # Local environment overrides
 .env
 **/application-local.yml
+
+# Kubernetes secrets
+k8s/secrets.env

@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     @GetMapping("")
     public String getHomePage(Model model){
-        return  "login";
+        model.addAttribute("pageStyle", "login");
+        return "app";
     }
     @GetMapping("/seat_reservation")
     public String getSeatsPage(Model model) {
-        return "seat_reservation";
+        model.addAttribute("pageStyle", "seat_reservation");
+        return "app";
     }
 
 }

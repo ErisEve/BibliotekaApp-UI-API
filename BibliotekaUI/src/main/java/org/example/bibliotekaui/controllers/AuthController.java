@@ -18,14 +18,15 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/login")
-    public String loginPage() {
-        return "login";
+    public String loginPage(Model model) {
+        model.addAttribute("pageStyle", "login");
+        return "app";
     }
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        model.addAttribute("username", "Librarian");
-        return "home";
+        model.addAttribute("pageStyle", "home");
+        return "app";
     }
 
     /**

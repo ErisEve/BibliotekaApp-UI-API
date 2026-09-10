@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Node dependencies are local; generated static/app assets MUST be committed.
+node_modules/
+coverage/
