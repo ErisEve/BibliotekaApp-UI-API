@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: biblioteka
+
+resources:
+  - namespace.yaml
+  - postgres.yaml
+  - eureka-server.yaml
+  - gateway-service.yaml
+  - user-service.yaml
+  - library-management-service.yaml
+  - loan-management-service.yaml
+  - seat-management-service.yaml
+  - ui-service.yaml
+  - ingress.yaml
+  # db-seed-job.yaml is deliberately absent - it is a one-time bootstrap that
+  # can only run after Hibernate has created the tables, and its ConfigMap comes
+  # from library-db-mkfile.sql at the repo root, which Kustomize will not read
+  # without relaxing its load restrictor. See the README's seeding step.
+
+# The name suffix hash is switched off on purpose. db-seed-job.yaml is applied
+# on its own (see above) and refers to these two objects by name, which only
+# works if the names are stable.
+#
+# The tradeoff: editing config.env or secrets.env no longer rolls the pods by
+# itself. Re-apply, then restart the Deployments that need the new value:
+#   kubectl -n biblioteka rollout restart deploy
+configMapGenerator:
+  - name: biblioteka-config
+    envs:
+      - config.env
+    options:
+      disableNameSuffixHash: true
+
+secretGenerator:
+  - name: biblioteka-secrets
+    envs:
+      - secrets.env
+    options:
+      disableNameSuffixHash: true
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: biblioteka

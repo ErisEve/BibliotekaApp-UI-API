@@ -1,0 +1,22 @@
+# One rule is enough. The gateway already owns all routing: /api/** goes to the
+# individual services and its catch-all Path=/** falls through to the UI, so the
+# Ingress only has to get traffic as far as the gateway.
+#
+# No host is set, so it matches whatever hostname arrives - which keeps the app
+# on http://localhost:8080 (see kind-cluster.yaml for why that matters).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: biblioteka
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8080
