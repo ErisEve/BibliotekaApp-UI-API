@@ -72,6 +72,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/seats/**").permitAll()
 //                        .requestMatchers("/api/seats/**").hasAnyRole("USER", "LIBRARIAN")
 
+                        // Actuator health must stay unauthenticated: Kubernetes
+                        // liveness/readiness probes arrive without a JWT.
+                        .requestMatchers("/actuator/**").permitAll()
+
                         // Add the swagger patterns
                         .requestMatchers(
                                 "/v3/api-docs/**",

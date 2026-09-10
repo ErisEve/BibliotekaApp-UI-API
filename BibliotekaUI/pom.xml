@@ -73,17 +73,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Azure Application Insights (if needed) -->
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>applicationinsights-spring-boot-starter</artifactId>
-			<version>2.6.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>applicationinsights-core</artifactId>
-			<version>3.5.1</version>
-		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
@@ -97,13 +86,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
-	<repositories>
-		<repository>
-			<id>microsoft-azure</id>
-			<url>https://pkgs.dev.azure.com/mseng/AzureSDK/_packaging/Maven/maven/v1</url>
-		</repository>
-	</repositories>
 
 	<build>
 		<plugins>

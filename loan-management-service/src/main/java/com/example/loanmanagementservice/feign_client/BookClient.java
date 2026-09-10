@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Optional;
 
-@FeignClient(name="gateway-service", url = "http://localhost:8080", contextId = "bookClient", configuration = FeignConfig.class)
+@FeignClient(name = "gateway-service", url = "${GATEWAY_URL:http://localhost:8080}", contextId = "bookClient", configuration = FeignConfig.class)
 public interface BookClient {
     @GetMapping("/api/books/{id}")
     Optional<Book> getBookById(@PathVariable Long id);

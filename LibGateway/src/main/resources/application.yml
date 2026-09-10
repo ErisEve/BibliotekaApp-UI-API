@@ -111,13 +111,12 @@ resilience4j:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: true
-    hostname: localhost
-    instance-id: ${spring.application.name}
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 
 # Actuator endpoints
 management:
@@ -128,6 +127,9 @@ management:
   endpoint:
     gateway:
       enabled: true
+    health:
+      probes:
+        enabled: true
 
 # Logging
 logging:

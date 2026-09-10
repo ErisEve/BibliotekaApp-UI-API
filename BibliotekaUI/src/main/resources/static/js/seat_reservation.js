@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = "http://localhost:8080/api/seats";
+const API_BASE_URL = "/api/seats";
 let seatsData = [];
 let globalSeatsData = [];
 let selectedSeatId = null;
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', init);
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/users/update', {
+            const response = await fetch('/api/users/update', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

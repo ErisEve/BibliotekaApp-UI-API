@@ -80,6 +80,10 @@ public class SecurityConfig {
                         // Only ADMIN can delete books
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("LIBRARIAN")
 
+                        // Actuator health must stay unauthenticated: Kubernetes
+                        // liveness/readiness probes arrive without a JWT.
+                        .requestMatchers("/actuator/**").permitAll()
+
                         // Add the swagger patterns
                         .requestMatchers(
                                 "/v3/api-docs/**",

@@ -84,19 +84,22 @@ INSERT INTO public.books (id, author, description, fetched_by, isbn, published_y
 
 
 --
--- TOC entry 4830 (class 0 OID 16580)
--- Dependencies: 220
--- Data for Name: lending; Type: TABLE DATA; Schema: public; Owner: postgres
+-- NOTE: users is loaded before seats and lending, out of pg_dump's
+-- alphabetical order. seats.reserved_by and lending.user_id are both
+-- foreign keys to users(id).
+-- TOC entry 4828 (class 0 OID 16558)
+-- Dependencies: 218
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (43, '2026-06-21', '2026-07-05', 6, 32);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (44, '2026-06-21', '2026-07-05', 6, 42);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (45, '2026-06-21', '2026-07-05', 6, 26);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (46, '2026-06-21', '2026-07-05', 6, 44);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (47, '2026-06-21', '2026-06-23', 6, 43);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (48, '2026-06-21', '2026-07-05', 1, 40);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (49, '2026-06-22', '2026-07-09', 6, 54);
-INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (50, '2026-06-22', '2026-07-12', 1, 53);
+INSERT INTO public.users (id, email, password_hash, role) VALUES (1, 'john@library.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (4, 'test@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (6, 'lala@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (9, 'aaa@library.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (3, 'me@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (5, 'newone@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (8, 'a@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
+INSERT INTO public.users (id, email, password_hash, role) VALUES (2, 'jane@library.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
 
 
 --
@@ -136,23 +139,28 @@ INSERT INTO public.seats (id, seat_number, reserved_by) VALUES (31, 'D7', NULL);
 INSERT INTO public.seats (id, seat_number, reserved_by) VALUES (32, 'D8', NULL);
 INSERT INTO public.seats (id, seat_number, reserved_by) VALUES (4, 'A4', 5);
 INSERT INTO public.seats (id, seat_number, reserved_by) VALUES (8, 'A8', 6);
-INSERT INTO public.seats (id, seat_number, reserved_by) VALUES (6, 'A6', 6);
+-- Was reserved_by = 6, but user 6 already holds seat A8 and Seat.user is
+-- @OneToOne (UNIQUE on reserved_by), so this row could never load. Freed.
+INSERT INTO public.seats (id, seat_number, reserved_by) VALUES (6, 'A6', NULL);
 
 
 --
--- TOC entry 4828 (class 0 OID 16558)
--- Dependencies: 218
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+-- NOTE: lending is loaded last. Its foreign keys reference users(id)
+-- and books(id), so loading it before users leaves every lending row
+-- rejected on a fresh database.
+-- TOC entry 4830 (class 0 OID 16580)
+-- Dependencies: 220
+-- Data for Name: lending; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.users (id, email, password_hash, role) VALUES (1, 'john@library.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (4, 'test@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (6, 'lala@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (9, 'aaa@library.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (3, 'me@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (5, 'newone@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (8, 'a@example.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'LIBRARIAN');
-INSERT INTO public.users (id, email, password_hash, role) VALUES (2, 'jane@library.com', '$2a$12$woRgcx5crq5IWy88GXlJruqIzRg5AhLY/X0x9oMvAGNAY.JVwxXDK', 'USER');
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (43, '2026-06-21', '2026-07-05', 6, 32);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (44, '2026-06-21', '2026-07-05', 6, 42);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (45, '2026-06-21', '2026-07-05', 6, 26);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (46, '2026-06-21', '2026-07-05', 6, 44);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (47, '2026-06-21', '2026-06-23', 6, 43);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (48, '2026-06-21', '2026-07-05', 1, 40);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (49, '2026-06-22', '2026-07-09', 6, 54);
+INSERT INTO public.lending (id, borrow_date, return_date, user_id, book_id) VALUES (50, '2026-06-22', '2026-07-12', 1, 53);
 
 
 --

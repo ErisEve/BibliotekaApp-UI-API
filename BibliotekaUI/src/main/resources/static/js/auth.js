@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function loginUser(email, password) {
-        const API_URL = 'http://localhost:8080';
+        const API_URL = '';
         localStorage.setItem('userEmail', email);
         fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',

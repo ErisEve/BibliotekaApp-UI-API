@@ -71,6 +71,10 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/lendings/**").permitAll()
 
+                        // Actuator health must stay unauthenticated: Kubernetes
+                        // liveness/readiness probes arrive without a JWT.
+                        .requestMatchers("/actuator/**").permitAll()
+
                         // Add the swagger patterns
                         .requestMatchers(
                                 "/v3/api-docs/**",

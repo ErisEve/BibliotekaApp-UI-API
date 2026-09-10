@@ -5,8 +5,8 @@ const booksGridElement = document.getElementById('booksgrid');
 let globalBooksData = [];
 let globalLoansData = [];
 let token;
-const booksApiUrl = 'http://localhost:8080/api/books/booksAll';
-const loansApiUrl = 'http://localhost:8080/api/lendings';
+const booksApiUrl = '/api/books/booksAll';
+const loansApiUrl = '/api/lendings';
 
 // ========================================
 // OPEN BOOK DETAIL MODAL
@@ -139,7 +139,7 @@ function makeANewLoan(event) {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     }
 
-    fetch('http://localhost:8080/api/lendings/loanABook', {
+    fetch('/api/lendings/loanABook', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -205,7 +205,7 @@ function searchBooks() {
     }
 
     token = localStorage.getItem('jwtToken');
-    const searchApiUrl = `http://localhost:8080/api/books/search?keyword=${encodeURIComponent(keyword)}`;
+    const searchApiUrl = `/api/books/search?keyword=${encodeURIComponent(keyword)}`;
 
     console.log('Searching for:', keyword);
 
@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         });
 
-        fetch(`http://localhost:8080/api/lendings/delete/${loanId}`, {
+        fetch(`/api/lendings/delete/${loanId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -995,7 +995,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/users/update', {
+            const response = await fetch('/api/users/update', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -1492,7 +1492,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Fetching book with ISBN:', isbn);
             console.log('This may take 10-30 seconds...');
             try {
-                const response = await fetch(`http://localhost:8081/api/books/fetch?isbn=${isbn}`, {
+                const response = await fetch(`/api/books/fetch?isbn=${isbn}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1650,7 +1650,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('jwtToken');
 
             try {
-                const response = await fetch('http://localhost:8081/api/books/add', {
+                const response = await fetch('/api/books/add', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
