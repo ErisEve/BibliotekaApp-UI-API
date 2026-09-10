@@ -3,6 +3,7 @@ import { api } from './api.js';
 import { Field, Icon, Notice } from './components.jsx';
 import { Dashboard } from './Dashboard.jsx';
 import { Seats } from './Seats.jsx';
+import { ThemeToggle } from './ThemeToggle.jsx';
 
 export function Login() {
   const [visible, setVisible] = useState(false);
@@ -21,6 +22,7 @@ export function Login() {
     } catch (error) { setError(error.message); } finally { setBusy(false); }
   }
   return <div className="login-container"><div className="login-card"><div className="login-header"><div className="brand-icon"><Icon name="book-open" /></div><h1>Biblioteka<span>Online Servis</span></h1><p>Uloguj se u biblioteku</p></div>
+    <div className="login-theme"><ThemeToggle /></div>
     <Notice message={error} error /><form className="login-form" onSubmit={submit}>
       <Field label="Email" name="email" type="email" autoComplete="username" required placeholder="librarian@library.org" />
       <div className="password-wrapper"><Field label="Sifra" name="password" type={visible ? 'text' : 'password'} autoComplete="current-password" required /><button type="button" className="toggle-btn" aria-label={visible ? 'Sakrij sifru' : 'Prikazi sifru'} onClick={() => setVisible(!visible)}><Icon name={visible ? 'eye-slash' : 'eye'} /></button></div>

@@ -1,8 +1,8 @@
 import { build, context } from 'esbuild';
 
 const options = {
-  entryPoints: ['frontend/src/main.jsx'],
-  outfile: 'src/main/resources/static/app/app.js',
+  entryPoints: { app: 'frontend/src/main.jsx', theme: 'frontend/src/theme-init.js' },
+  outdir: 'src/main/resources/static/app',
   bundle: true,
   minify: true,
   jsx: 'automatic',

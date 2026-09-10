@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { api, logout } from './api.js';
+import { ThemeToggle } from './ThemeToggle.jsx';
 
 export const Icon = ({ name }) => <i aria-hidden="true" className={`fas fa-${name}`} />;
 export const Notice = ({ message, error = false }) => message && <div role={error ? 'alert' : 'status'} className={`notice ${error ? 'error' : ''}`}>{message}</div>;
@@ -72,7 +73,7 @@ export function Header({ seats = false, onAddBook, children }) {
   return <><header className="dashboard-header">
     <div className="header-left"><a href="/dashboard" className="brand-icon" aria-label="Biblioteka"><Icon name="book-open" /></a><h1>Biblioteka<span>{seats ? 'Rezervacija stola' : 'Online Servis'}</span></h1></div>
     <a className="nav-link active" href={seats ? '/dashboard' : '/seat_reservation'}><Icon name={seats ? 'book' : 'chair'} /> {seats ? 'Pozajmi knjigu' : 'Rezerviši sedište'}</a>
-    <div className="header-actions">{children}<div className="user-profile" ref={ref}>
+    <div className="header-actions">{children}<ThemeToggle /><div className="user-profile" ref={ref}>
       <button className="profile-trigger" aria-expanded={menu} aria-haspopup="true" onClick={() => setMenu(!menu)}><span className="avatar">{email.charAt(0).toUpperCase() || 'L'}</span>{email.split('@')[0]}<Icon name="chevron-down" /></button>
       {menu && <div className="context-menu open"><button className="menu-item" onClick={() => { setProfile(true); setMenu(false); }}>Promeni podatke</button>
         {onAddBook && <button className="menu-item" onClick={() => { onAddBook(); setMenu(false); }}>Dodaj novu knjigu</button>}

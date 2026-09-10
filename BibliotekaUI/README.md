@@ -22,9 +22,13 @@ running a packaged JAR or container, rebuild it to include changed resources.
 
 **Commit generated build files** in `src/main/resources/static/app/` together with
 the React sources, `package.json`, and `package-lock.json`. This includes `app.js`,
-`app.css`, and the generated license file. Never edit generated files by hand.
+`app.css`, `theme.js`, and the generated license file. Never edit generated files by hand.
 The esbuild configuration is in `frontend/build.mjs`; existing page styles remain
 in `src/main/resources/static/css/`.
+
+The theme toggle is available on every page. It defaults to the browser's system
+preference and saves an explicit light/dark choice in local storage. The small
+`theme.js` entry applies this preference before the page is painted.
 
 Maven and Docker package these checked-in assets without requiring Node or an npm
 download. After frontend changes run `npm run build` before `mvn package` or
