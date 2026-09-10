@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,14 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // Use a strong secret key (at least 256 bits for HS256) for HMAC-SHA algorithms
-    private final String SECRET_KEY = "this_is_a_secret_key_for_jwt_library_api_12345";
+    // Shared HMAC-SHA secret, injected from jwt.secret (JWT_SECRET env var).
+    // Must be at least 256 bits for HS256, and identical across all services.
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
 
-    // Token validity (10 hours)
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;
+    // Token validity in milliseconds, injected from jwt.expiration-ms
+    @Value("${jwt.expiration-ms}")
+    private long EXPIRATION_TIME;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());

@@ -5,9 +5,9 @@ spring:
     application:
         name: seat-management-service
     datasource:
-        url: jdbc:postgresql://localhost:5432/library_metadata
-        username: postgres
-        password: 1
+        url: "${DB_URL:jdbc:postgresql://localhost:5432/library_metadata}"
+        username: "${DB_USERNAME:postgres}"
+        password: "${DB_PASSWORD:1}"
         driver-class-name: org.postgresql.Driver
     jpa:
         hibernate:
@@ -15,7 +15,11 @@ spring:
             show-sql: true
             dialect: org.hibernate.dialect.PostgreSQLDialect
 jwt:
-    secret: "this_is_a_secret_key_for_jwt_library_api_12345"
+    # Override with the JWT_SECRET environment variable. Every service must share
+    # the same value, or tokens issued by user-service will not validate elsewhere.
+    secret: "${JWT_SECRET:dev-only-insecure-secret-change-me-in-production}"
+    expiration-ms: ${JWT_EXPIRATION_MS:36000000}
+
 eureka:
     client:
         service-url:

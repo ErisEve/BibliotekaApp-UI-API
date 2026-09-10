@@ -27,7 +27,7 @@ DROP DATABASE library_metadata;
 -- Name: library_metadata; Type: DATABASE; Schema: -; Owner: postgres
 --
 
-CREATE DATABASE library_metadata WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'Serbian (Latin)_Serbia.1252';
+CREATE DATABASE library_metadata WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'C.UTF-8';
 
 
 ALTER DATABASE library_metadata OWNER TO postgres;

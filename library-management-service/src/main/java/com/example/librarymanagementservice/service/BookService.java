@@ -2,13 +2,14 @@ package com.example.librarymanagementservice.service;
 
 import com.example.librarymanagementservice.model.Book;
 import com.example.librarymanagementservice.repository.BookRepository;
-import org.aspectj.weaver.loadtime.definition.LightXMLParser;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,14 +26,19 @@ public class BookService {
     }
 
     public Optional<Book> findById(Long id) {
-        return bookRepository.findById(id);
+        return bookRepository.findById(id)
+                .map(book -> withAvailability(book, bookRepository.isBookLoaned(id)));
     }
 
     public List<Book> findAll() {
-        return bookRepository.findAll();
+        return withAvailability(bookRepository.findAll());
     }
 
-    public List<Book> findAllAvailable() {return bookRepository.findAllAvailable();}
+    public List<Book> findAllAvailable() {
+        List<Book> books = bookRepository.findAllAvailable();
+        books.forEach(book -> withAvailability(book, false));
+        return books;
+    }
 
     public void deleteById(Long id) {
         bookRepository.deleteById(id);
@@ -43,7 +49,23 @@ public class BookService {
     }
 
     public List<Book> searchByKeyword(String keyword) {
-        return bookRepository.searchByKeyword(keyword.toLowerCase());
+        return withAvailability(bookRepository.searchByKeyword(keyword.toLowerCase()));
+    }
+
+    /**
+     * Availability is owned by the lending records, not by the books table: the
+     * stored "available" column was never maintained, so it is recomputed here
+     * for every book leaving this service.
+     */
+    private List<Book> withAvailability(List<Book> books) {
+        Set<Long> loanedIds = new HashSet<>(bookRepository.findLoanedBookIds());
+        books.forEach(book -> withAvailability(book, loanedIds.contains(book.getId())));
+        return books;
+    }
+
+    private Book withAvailability(Book book, boolean loaned) {
+        book.setAvailable(!loaned);
+        return book;
     }
 
     public List<Map<String, Object>> getTopActiveUsers() {

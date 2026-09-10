@@ -19,7 +19,7 @@ spring:
         - id: user-service
           uri: lb://user-service  # Load-balanced routing via Eureka
           predicates:
-            - Path=/api/users/**, /api/auth/**, /findByEmail/**
+            - Path=/api/users/**, /api/auth/**
           filters:
             - name: CircuitBreaker
               args:

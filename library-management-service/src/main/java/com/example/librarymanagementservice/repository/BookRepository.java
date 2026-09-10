@@ -27,9 +27,18 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query(value = """
     SELECT *
     FROM books
-    WHERE id NOT IN (SELECT book_id FROM lending)
+    WHERE id NOT IN (SELECT book_id FROM lending WHERE book_id IS NOT NULL)
     """, nativeQuery = true)
     List<Book> findAllAvailable();
+
+
+    /** Ids of every book that currently has an open lending record. */
+    @Query(value = "SELECT DISTINCT book_id FROM lending WHERE book_id IS NOT NULL", nativeQuery = true)
+    List<Long> findLoanedBookIds();
+
+
+    @Query(value = "SELECT EXISTS (SELECT 1 FROM lending WHERE book_id = :bookId)", nativeQuery = true)
+    boolean isBookLoaned(@Param("bookId") Long bookId);
 
 
     // Find books with titles containing the given string

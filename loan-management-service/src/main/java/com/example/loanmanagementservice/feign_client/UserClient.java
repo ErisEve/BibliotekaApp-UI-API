@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @FeignClient(name = "gateway-service",  url = "http://localhost:8080",contextId = "userClient", configuration = FeignConfig.class)
 public interface UserClient {
-    @GetMapping("/users/{id}")
+    @GetMapping("/api/users/{id}")
     User getUser(@PathVariable Long id);
 
     @GetMapping("api/users/findByEmail/{email}")

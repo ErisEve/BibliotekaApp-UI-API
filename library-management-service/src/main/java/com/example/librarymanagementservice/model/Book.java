@@ -41,6 +41,8 @@ public class Book {
     @Column(name = "cover_url")
     private String coverUrl;
 
+    // Recomputed from the lending records on every read (see BookService); the
+    // stored column is kept only so existing rows and the SQL dump stay loadable.
     @Column(name = "available")
     @Builder.Default
     private Boolean available = true;
