@@ -69,15 +69,11 @@ public class SecurityConfig {
                         // Allow unauthenticated access to auth endpoints and home
                         .requestMatchers("/", "/api/auth/**").permitAll()
                         .requestMatchers("/", "/login", "/css/**", "/js/**", "/static/**").permitAll()
-                        // Secure /api/books/fetch and other book management endpoints - only authenticated users
-                        .requestMatchers("/api/books/fetch").authenticated()
-
-                        // Allow both USER and ADMIN to access /api/books
-                        .requestMatchers(HttpMethod.POST, "/api/books/**").hasAnyRole("LIBRARIAN", "USER")
+                        // Both USER and LIBRARIAN can read books
                         .requestMatchers(HttpMethod.GET, "/api/books/**").hasAnyRole("LIBRARIAN", "USER")
-                        .requestMatchers("/api/books/fetch").hasAuthority("ROLE_LIBRARIAN")
 
-                        // Only ADMIN can delete books
+                        // Only LIBRARIAN can add (POST /api/books, /add, /fetch) or delete books
+                        .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("LIBRARIAN")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("LIBRARIAN")
 
                         // Actuator health must stay unauthenticated: Kubernetes

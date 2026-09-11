@@ -80,6 +80,7 @@ public class BookController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('LIBRARIAN')")
     @PostMapping
     public Book createBook(@RequestBody Book book) {
         return bookService.save(book);
@@ -102,6 +103,7 @@ public class BookController {
             @ApiResponse(responseCode = "200", description = "Book fetched and saved successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @PreAuthorize("hasRole('LIBRARIAN')")
     @PostMapping("/fetch")
     public ResponseEntity<String> fetchAndSaveBook(@Parameter(description =
             "ISBN number of the book to fetch and principal representing the authenticated user")
@@ -142,6 +144,7 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "Access denied - Librarian role required"),
             @ApiResponse(responseCode = "409", description = "Book with this ISBN already exists")
     })
+    @PreAuthorize("hasRole('LIBRARIAN')")
     @PostMapping("/add")
     public ResponseEntity<?> addBookManually(
             @Parameter(description = "Book object to be added", required = true)

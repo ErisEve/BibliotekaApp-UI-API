@@ -107,6 +107,20 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
         minimumNumberOfCalls: 5
 
+  # The CircuitBreaker filter also applies a TimeLimiter, whose default is 1s. That is shorter than
+  # a normal call to Open Library from POST /api/books/fetch, so the gateway used to abandon the
+  # request and forward it to the fallback while the book was still being saved downstream.
+  timelimiter:
+    instances:
+      userService:
+        timeoutDuration: 30s
+      libraryService:
+        timeoutDuration: 30s
+      loanService:
+        timeoutDuration: 30s
+      seatService:
+        timeoutDuration: 30s
+
 
 eureka:
   client:

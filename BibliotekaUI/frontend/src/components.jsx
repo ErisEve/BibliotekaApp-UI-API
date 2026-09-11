@@ -75,9 +75,9 @@ export function Header({ seats = false, onAddBook, children }) {
     <a className="nav-link active" href={seats ? '/dashboard' : '/seat_reservation'}><Icon name={seats ? 'book' : 'chair'} /> {seats ? 'Pozajmi knjigu' : 'Rezerviši sedište'}</a>
     <div className="header-actions">{children}<ThemeToggle /><div className="user-profile" ref={ref}>
       <button className="profile-trigger" aria-expanded={menu} aria-haspopup="true" onClick={() => setMenu(!menu)}><span className="avatar">{email.charAt(0).toUpperCase() || 'L'}</span>{email.split('@')[0]}<Icon name="chevron-down" /></button>
-      {menu && <div className="context-menu open"><button className="menu-item" onClick={() => { setProfile(true); setMenu(false); }}>Promeni podatke</button>
-        {onAddBook && <button className="menu-item" onClick={() => { onAddBook(); setMenu(false); }}>Dodaj novu knjigu</button>}
-        <button className="menu-item danger" onClick={logout}>Odjavi se</button></div>}
+      {menu && <div className="context-menu open"><button className="menu-item" onClick={() => { setProfile(true); setMenu(false); }}><Icon name="user-edit" />Promeni podatke</button>
+        {onAddBook && <button className="menu-item" onClick={() => { onAddBook(); setMenu(false); }}><Icon name="plus-circle" />Dodaj novu knjigu</button>}
+        <button className="menu-item danger" onClick={logout}><Icon name="sign-out-alt" />Odjavi se</button></div>}
     </div></div>
   </header>{profile && <Profile onClose={() => setProfile(false)} onSaved={setEmail} />}</>;
 }

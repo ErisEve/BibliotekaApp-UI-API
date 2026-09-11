@@ -21,7 +21,7 @@ public class ExternalBookService {
 
     public Book fetchFromOpenLibrary(String isbn) {
         // Clean the ISBN (remove hyphens and spaces)
-        String cleanIsbn = isbn.replace("-", "").replace(" ", "").trim();
+        String cleanIsbn = isbn.replaceAll("\\D", "").trim();
         logger.info("Fetching book with ISBN: {}", cleanIsbn);
 
         // Open Library API endpoint (no API key required!)

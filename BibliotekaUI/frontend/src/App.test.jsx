@@ -125,3 +125,37 @@ test('librarians can return loans and borrowed books are excluded from the grid'
   await user.click(screen.getByRole('button', { name: 'Vrati knjigu' }));
   await waitFor(() => expect(fetch.mock.calls.some(([url, options]) => url === '/api/lendings/delete/30' && options.method === 'DELETE')).toBe(true));
 });
+
+test.each([
+  { bookId: '10', bookTitle: 'Borrowed Book' },
+  { book: { id: 10, title: 'Borrowed Book', author: 'Writer', coverUrl: '/covers/borrowed.jpg' } },
+])('lent cards resolve covers from catalog IDs or embedded books', async loanBook => {
+  const book = { id: 10, title: 'Borrowed Book', author: 'Writer', coverUrl: '/covers/borrowed.jpg' };
+  vi.stubGlobal('fetch', vi.fn(async path => respond(path.includes('booksAll') ? [book] : [
+    { id: 30, ...loanBook, userEmail: 'reader@example.com', returnDate: '2026-09-01', overdue: true },
+  ])));
+  render(<Dashboard />);
+  const cover = await screen.findByRole('img', { name: 'Borrowed Book' });
+  expect(cover.getAttribute('src')).toBe('/covers/borrowed.jpg');
+  expect(screen.getByText('Writer')).toBeTruthy();
+  expect(screen.getByText('reader@example.com')).toBeTruthy();
+  expect(screen.getByText(/2026-09-01/).classList.contains('overdue')).toBe(true);
+  expect(screen.queryByRole('button', { name: 'Vrati knjigu' })).toBeNull();
+  expect(screen.queryByRole('button', { name: /Borrowed Book/ })).toBeNull();
+});
+
+test('only librarians see the add-book menu item', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respond([])));
+  const user = userEvent.setup();
+  render(<Dashboard />);
+  await screen.findByText('Nema knjiga.');
+  await user.click(screen.getByRole('button', { name: /reader/ }));
+  expect(screen.queryByRole('button', { name: 'Dodaj novu knjigu' })).toBeNull();
+  cleanup();
+
+  localStorage.setItem('role', 'LIBRARIAN');
+  render(<Dashboard />);
+  await screen.findByText('Nema knjiga.');
+  await user.click(screen.getByRole('button', { name: /reader/ }));
+  expect(screen.getByRole('button', { name: 'Dodaj novu knjigu' })).toBeTruthy();
+});
