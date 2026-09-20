@@ -31,6 +31,8 @@ spec:
       labels:
         app: gateway-service
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "worker"
       initContainers:
         # Kubernetes has no equivalent of Compose's `depends_on: service_healthy`.
         # Without this gate the pod would boot, fail to reach the registry, and

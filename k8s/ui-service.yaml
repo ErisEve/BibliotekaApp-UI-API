@@ -31,6 +31,8 @@ spec:
       labels:
         app: ui-service
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "worker"
       initContainers:
         - name: wait-for-gateway
           image: busybox:stable

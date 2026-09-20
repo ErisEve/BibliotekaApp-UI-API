@@ -30,6 +30,8 @@ spec:
       labels:
         app: seat-management-service
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "worker"
       initContainers:
         - name: wait-for-postgres
           image: postgres:17

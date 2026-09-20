@@ -30,6 +30,8 @@ spec:
       labels:
         app: eureka-server
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: "worker"
       containers:
         - name: eureka-server
           image: biblioteka/eureka-server:dev
