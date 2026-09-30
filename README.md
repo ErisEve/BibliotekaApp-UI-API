@@ -180,6 +180,42 @@ kind delete cluster --name biblioteka
 - **A 405 right after a pod restart.** The gateway caches the Eureka registry for about 30 seconds, so for a moment it still routes to the address of a pod that no longer exists, the circuit breaker opens, and the fallback handler — which only accepts GET — answers a POST with 405. It clears on its own; wait half a minute and try again.
 - **`too many open files` during cluster creation.** WSL's inotify limits are too low for kind. Raise them with `sudo sysctl fs.inotify.max_user_instances=512`.
 
+## Running on k3s (one server, two agents)
+The same `k8s/` manifests also run on a multi-node k3s cluster. The server machine runs only the control plane and the k3s add-ons. All eight Biblioteka pods run on the two agents, which here are WSL2 machines.
+
+Three rules keep the workloads off the server and out of trouble:
+- The server is tainted `CriticalAddonsOnly=true:NoExecute`, so only k3s's own add-ons run there.
+- Every workload selects `node-role.kubernetes.io/worker=worker`, and only the agents carry that label.
+- Nothing is pinned by `kubernetes.io/hostname`. If a pinned name does not exactly match the node's label, the kubelet rejects the pod and the ReplicaSet recreates it in an endless loop. That is how this cluster once piled up ~11k dead pods.
+
+**Server** — install `k8s/k3s/server-config.yaml` as `/etc/rancher/k3s/config.yaml`, restart, and put Traefik on port 8080 (CORS still requires `http://localhost:8080`):
+
+```bash
+sudo install -m 600 k8s/k3s/server-config.yaml /etc/rancher/k3s/config.yaml
+sudo systemctl restart k3s
+kubectl taint nodes "$(hostname)" CriticalAddonsOnly=true:NoExecute --overwrite   # the config only taints at first registration
+kubectl apply -f k8s/k3s/traefik-config.yaml
+```
+
+**Agents** — first switch WSL to mirrored networking. Otherwise the agents register unreachable NAT addresses and traffic between nodes silently fails; `k8s/k3s/agent-config.yaml` explains the details. Then fill in that file, install it as `/etc/rancher/k3s/config.yaml` on each agent, and restart `k3s-agent`. From the server, label both agents:
+
+```bash
+kubectl label node <agent-1> <agent-2> node-role.kubernetes.io/worker=worker --overwrite
+```
+
+k3s agents cannot set a `node-role.kubernetes.io/*` label on themselves, which is why this step is manual.
+
+**Images** — the `:dev` images are never pulled from a registry, so each agent needs its own copy:
+
+```bash
+docker save biblioteka/eureka-server:dev biblioteka/gateway-service:dev \
+  biblioteka/user-service:dev biblioteka/library-service:dev \
+  biblioteka/loan-service:dev biblioteka/seat-service:dev \
+  biblioteka/ui-service:dev | ssh <agent> sudo k3s ctr images import -
+```
+
+Then deploy and seed the database exactly as in steps 5–7 above. `kubectl -n biblioteka get pods -o wide` should show every pod on one of the two agents.
+
 ## Application features
 ### Existing services
 This application consists of 5 separate services:

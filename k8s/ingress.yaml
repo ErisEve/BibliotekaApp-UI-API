@@ -4,12 +4,15 @@
 #
 # No host is set, so it matches whatever hostname arrives - which keeps the app
 # on http://localhost:8080 (see kind-cluster.yaml for why that matters).
+#
+# k3s ships Traefik as its ingress controller, not ingress-nginx.
+# k8s/k3s/traefik-config.yaml moves Traefik's web entrypoint to 8080.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: biblioteka
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
     - http:
         paths:

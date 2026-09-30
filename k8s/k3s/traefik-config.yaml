@@ -1,0 +1,19 @@
+# Moves k3s's bundled Traefik from port 80 to 8080.
+#
+# The downstream SecurityConfig classes still hardcode http://localhost:8080 in
+# their CORS allow-lists, so the browser must use exactly that origin. ServiceLB
+# publishes Traefik's LoadBalancer ports on every node, so after this change
+# http://localhost:8080 on the server machine reaches the gateway.
+#
+# Apply once:  kubectl apply -f k8s/k3s/traefik-config.yaml
+# (or copy it into /var/lib/rancher/k3s/server/manifests/ on the server)
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      web:
+        exposedPort: 8080
